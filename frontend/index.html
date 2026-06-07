@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ഹസ്തരേഖ — AI Palm Reader</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Sans+Malayalam:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: rgba(201, 168, 76, 0.18);
+      --gold-glow: rgba(201, 168, 76, 0.35);
+      --deep: #080510;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface2: rgba(255, 255, 255, 0.07);
+      --text: #f0e6d3;
+      --text-dim: rgba(240, 230, 211, 0.55);
+      --rose: #c46b7a;
+      --indigo: #5b4faa;
+      --r: 14px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── CANVAS BACKGROUND ── */
+    #cosmosCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── MAIN WRAPPER ── */
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 80px;
+    }
+
+    /* ── HERO HEADER ── */
+    .hero {
+      width: 100%;
+      max-width: 680px;
+      text-align: center;
+      padding: 60px 0 40px;
+      animation: fadeDown 1.2s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .yantra {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 28px;
+      position: relative;
+    }
+
+    .yantra svg {
+      width: 100%;
+      height: 100%;
+      animation: rotateYantra 60s linear infinite;
+      filter: drop-shadow(0 0 14px var(--gold-glow));
+    }
+
+    @keyframes rotateYantra {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 7vw, 3.2rem);
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 3px;
+      line-height: 1.1;
+      text-shadow: 0 0 40px var(--gold-glow);
+    }
+
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      font-style: italic;
+      color: var(--text-dim);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .divider {
+      width: 160px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 24px auto 0;
+      opacity: .6;
+    }
+
+    /* ── MUSIC PLAYER ── */
+    .music-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(8, 5, 16, 0.85);
+      border: 1px solid var(--gold-dim);
+      border-radius: 50px;
+      padding: 10px 18px 10px 14px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      transition: transform .2s;
+    }
+
+    .music-bar:hover {
+      transform: translateY(-2px)
+    }
+
+    .music-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+    }
+
+    .music-btn:hover {
+      background: var(--gold-glow)
+    }
+
+    .music-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .music-waves {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 18px;
+      margin-left: 6px
+    }
+
+    .music-waves span {
+      width: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      animation: musicWave 1.2s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .music-waves span:nth-child(2) {
+      animation-delay: .15s
+    }
+
+    .music-waves span:nth-child(3) {
+      animation-delay: .3s
+    }
+
+    .music-waves span:nth-child(4) {
+      animation-delay: .45s
+    }
+
+    .music-waves.playing span {
+      opacity: 1
+    }
+
+    @keyframes musicWave {
+
+      0%,
+      100% {
+        height: 4px
+      }
+
+      50% {
+        height: 16px
+      }
+    }
+
+    /* ── STEP INDICATOR ── */
+    .steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 32px;
+      animation: fadeUp .8s .3s both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(201, 168, 76, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-family: 'Playfair Display', serif;
+      color: var(--text-dim);
+      transition: all .5s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .step.active .step-dot {
+      border-color: var(--gold);
+      color: var(--gold-light);
+      background: var(--gold-dim);
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+
+    .step.done .step-dot {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: var(--deep);
+    }
+
+    .step-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-style: italic;
+      transition: color .3s;
+    }
+
+    .step.active .step-label {
+      color: var(--gold)
+    }
+
+    .step-line {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to right, var(--gold-dim), var(--gold-dim));
+      margin-bottom: 18px;
+      transition: background .5s;
+    }
+
+    .step-line.done {
+      background: linear-gradient(to right, var(--gold), var(--gold))
+    }
+
+    @media(max-width:480px) {
+      .step-line {
+        width: 30px
+      }
+
+      .step-label {
+        font-size: 9px
+      }
+    }
+
+    /* ── UPLOAD CARD ── */
+    .upload-card {
+      width: 100%;
+      max-width: 680px;
+      animation: fadeUp .8s .4s both;
+    }
+
+    /* HOW-TO GUIDE */
+    .howto {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .howto-item {
+      background: var(--surface);
+      border: 1px solid rgba(201, 168, 76, 0.1);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: border-color .3s, background .3s;
+    }
+
+    .howto-item:hover {
+      border-color: rgba(201, 168, 76, 0.3);
+      background: var(--surface2);
+    }
+
+    .howto-icon {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      display: block
+    }
+
+    .howto-text {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* DROP ZONE */
+    .drop-zone {
+      border: 1.5px dashed rgba(201, 168, 76, 0.3);
+      border-radius: var(--r);
+      padding: 56px 24px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all .4s cubic-bezier(.16, 1, .3, 1);
+      background: var(--surface);
+    }
+
+    .drop-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--gold);
+      background: rgba(201, 168, 76, 0.06);
+      transform: scale(1.01);
+    }
+
+    .drop-zone input {
+      display: none
+    }
+
+    .drop-icon {
+      font-size: 3.2rem;
+      margin-bottom: 12px;
+      display: block;
+      filter: drop-shadow(0 0 8px var(--gold-glow));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    .drop-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .drop-sub {
+      font-size: .9rem;
+      font-style: italic;
+      color: var(--text-dim)
+    }
+
+    /* ── PREVIEW GRID ── */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+      animation: fadeUp .5s both;
+    }
+
+    @media(max-width:500px) {
+      .preview-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .preview-box {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      background: var(--surface);
+      position: relative;
+    }
+
+    .preview-box-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-style: italic;
+      background: rgba(8, 5, 16, 0.7);
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--gold-dim);
+    }
+
+    .preview-box img {
+      width: 100%;
+      display: block;
+      transition: transform .4s;
+    }
+
+    .preview-box:hover img {
+      transform: scale(1.03)
+    }
+
+    /* scanner overlay */
+    .scan-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .scan-beam {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), white, var(--gold), transparent);
+      position: absolute;
+      left: 0;
+      top: 0;
+      box-shadow: 0 0 12px var(--gold-glow);
+      opacity: 0;
+    }
+
+    .scanning .scan-beam {
+      animation: beamScan 2s linear infinite;
+      opacity: 1;
+    }
+
+    @keyframes beamScan {
+      0% {
+        top: 0%
+      }
+
+      100% {
+        top: 100%
+      }
+    }
+
+    /* ── ANALYZE BUTTON ── */
+    .btn-analyze {
+      width: 100%;
+      padding: 18px;
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      border-radius: 50px;
+      color: var(--gold-light);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 3px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all .4s cubic-bezier(.16, 1, .3, 1);
+      margin-top: 8px;
+    }
+
+    .btn-analyze::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, var(--gold-dim) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform .5s;
+    }
+
+    .btn-analyze:hover:not(:disabled)::before {
+      transform: translateX(100%)
+    }
+
+    .btn-analyze:hover:not(:disabled) {
+      background: var(--gold-dim);
+      box-shadow: 0 0 30px var(--gold-glow), 0 0 60px rgba(201, 168, 76, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-analyze:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+      border-color: rgba(201, 168, 76, 0.2);
+      color: var(--text-dim);
+    }
+
+    /* ── LOADING RITUAL ── */
+    .loading-ritual {
+      width: 100%;
+      max-width: 680px;
+      text-align: center;
+      padding: 60px 20px;
+      animation: fadeUp .5s both;
+    }
+
+    .ritual-mandala {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 30px;
+      position: relative;
+    }
+
+    .ritual-mandala svg {
+      animation: rotateYantra 3s linear infinite;
+      filter: drop-shadow(0 0 20px var(--gold-glow));
+    }
+
+    .ritual-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--gold-light);
+      margin-bottom: 12px;
+    }
+
+    .ritual-sub {
+      font-size: .85rem;
+      font-style: italic;
+      color: var(--text-dim);
+      letter-spacing: 2px
+    }
+
+    .ritual-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px
+    }
+
+    .ritual-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dotPulse 1.5s ease-in-out infinite;
+      opacity: .3;
+    }
+
+    .ritual-dots span:nth-child(2) {
+      animation-delay: .3s
+    }
+
+    .ritual-dots span:nth-child(3) {
+      animation-delay: .6s
+    }
+
+    @keyframes dotPulse {
+
+      0%,
+      100% {
+        opacity: .3;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.4)
+      }
+    }
+
+    /* ── READING RESULT ── */
+    .result-wrap {
+      width: 100%;
+      max-width: 680px;
+      animation: fadeUp .8s both;
+    }
+
+    /* CONFIDENCE BADGE */
+    .confidence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-style: italic;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .confidence-badge.high {
+      background: rgba(100, 180, 100, 0.12);
+      border: 1px solid rgba(100, 180, 100, 0.3);
+      color: #7ec87e;
+    }
+
+    .confidence-badge.medium {
+      background: rgba(201, 168, 76, 0.12);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-light);
+    }
+
+    .confidence-badge.low {
+      background: rgba(196, 107, 122, 0.12);
+      border: 1px solid rgba(196, 107, 122, 0.3);
+      color: var(--rose);
+    }
+
+    /* LANGUAGE SWITCHER */
+    .lang-switcher {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50px;
+      padding: 4px;
+      border: 1px solid var(--gold-dim);
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+
+    .lang-btn {
+      padding: 10px 28px;
+      border-radius: 50px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: .95rem;
+      font-style: italic;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      transition: all .3s;
+    }
+
+    .lang-btn.active {
+      background: var(--gold-dim);
+      color: var(--gold-light);
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+    }
+
+    /* TTS CONTROL */
+    .tts-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 50px;
+      padding: 8px 8px 8px 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .tts-label {
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .tts-btn {
+      background: var(--gold-dim);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      color: var(--gold-light);
+      border-radius: 50px;
+      padding: 7px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .tts-btn:hover:not(:disabled) {
+      background: var(--gold-glow);
+      border-color: var(--gold)
+    }
+
+    .tts-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed
+    }
+
+    .tts-waves {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 16px;
+      margin-left: 4px
+    }
+
+    .tts-waves span {
+      width: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      opacity: 0;
+      animation: musicWave 1s ease-in-out infinite;
+      transition: opacity .3s;
+    }
+
+    .tts-waves.active span {
+      opacity: 1
+    }
+
+    .tts-waves span:nth-child(2) {
+      animation-delay: .12s
+    }
+
+    .tts-waves span:nth-child(3) {
+      animation-delay: .24s
+    }
+
+    .tts-waves span:nth-child(4) {
+      animation-delay: .36s
+    }
+
+    /* READING BODY */
+    .reading-body {
+      line-height: 1.85;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .reading-body .r-section {
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: revealSection .7s cubic-bezier(.16, 1, .3, 1) forwards;
+    }
+
+    @keyframes revealSection {
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .reading-body .r-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--gold-light);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-style: normal;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .reading-body .r-section h3::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .reading-body p {
+      margin-bottom: 14px;
+      color: rgba(240, 230, 211, 0.88)
+    }
+
+    .reading-body .r-greeting {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--gold-light);
+      margin-bottom: 24px;
+      line-height: 1.7;
+      text-align: center;
+      padding: 20px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 12px;
+      background: rgba(201, 168, 76, 0.04);
+    }
+
+    /* RETAKE BTN */
+    .btn-retake {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: transparent;
+      border: 1px solid rgba(201, 168, 76, 0.3);
+      border-radius: 50px;
+      color: var(--text-dim);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: .95rem;
+      font-style: italic;
+      cursor: pointer;
+      transition: all .3s;
+      margin-top: 30px;
+      letter-spacing: 1px;
+    }
+
+    .btn-retake:hover {
+      border-color: var(--gold);
+      color: var(--gold-light);
+      background: var(--gold-dim);
+    }
+
+    /* ERROR */
+    .error-card {
+      background: rgba(196, 107, 122, 0.08);
+      border: 1px solid rgba(196, 107, 122, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      color: var(--rose);
+      font-style: italic;
+    }
+
+    /* FOOTER */
+    .footer {
+      margin-top: 60px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: .8rem;
+      font-style: italic;
+      letter-spacing: 2px;
+      animation: fadeUp 1s 1s both;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold-dim);
+      border-radius: 2px
+    }
+
+    /* DOMINANCE SELECTOR */
+    .dominance-select-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      background: var(--surface);
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+    }
+
+    .dominance-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-style: italic;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    .dominance-options {
+      display: flex;
+      gap: 20px;
+    }
+
+    .dom-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text);
+      transition: color 0.3s;
+    }
+
+    .dom-option input {
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .dom-option:hover {
+      color: var(--gold-light);
+    }
+
+    /* CONFIRMATION MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(8, 5, 16, 0.9);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #0d091a;
+      border: 1px solid var(--gold);
+      border-radius: var(--r);
+      padding: 30px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 30px var(--gold-glow);
+      animation: modalReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes modalReveal {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-content h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold-light);
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .modal-content p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.proceed {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+    }
+
+    .modal-btn.proceed:hover {
+      background: var(--gold-glow);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .modal-btn.cancel {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-dim);
+    }
+
+    .modal-btn.cancel:hover {
+      border-color: var(--text-dim);
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Cosmos Canvas -->
+  <canvas id="cosmosCanvas"></canvas>
+
+  <!-- Ambient Music -->
+  <div class="music-bar" id="musicBar">
+    <button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle ambient music">▶</button>
+    <span class="music-label">Mantra Ambience</span>
+    <div class="music-waves" id="musicWaves">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <!-- Hero -->
+    <header class="hero">
+      <div class="yantra">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="0.6" opacity=".5" />
+          <circle cx="50" cy="50" r="40" stroke="#c9a84c" stroke-width="0.4" stroke-dasharray="3 3" opacity=".4" />
+          <circle cx="50" cy="50" r="30" stroke="#c9a84c" stroke-width="0.6" opacity=".4" />
+          <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".7" />
+          <!-- 8-petal lotus -->
+          <g opacity=".55">
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+            <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+          </g>
+          <!-- triangle -->
+          <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+        </svg>
+      </div>
+      <h1>ഹസ്തരേഖ</h1>
+      <p class="hero-sub">Hastha Rekha • AI Palm Reading</p>
+      <div class="divider"></div>
+    </header>
+
+    <!-- Step Indicator -->
+    <div class="steps" id="stepIndicator">
+      <div class="step active" id="step1">
+        <div class="step-dot">1</div>
+        <div class="step-label">Upload</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step" id="step2">
+        <div class="step-dot">2</div>
+        <div class="step-label">Analyze</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step" id="step3">
+        <div class="step-dot">3</div>
+        <div class="step-label">Reading</div>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-card" id="uploadSection">
+
+      <!-- How-to guide -->
+      <div class="howto">
+        <div class="howto-item">
+          <span class="howto-icon">☀️</span>
+          <p class="howto-text">Good natural light — near a window works best</p>
+        </div>
+        <div class="howto-item">
+          <span class="howto-icon">✋</span>
+          <p class="howto-text">Open palm, fingers relaxed and slightly spread</p>
+        </div>
+        <div class="howto-item">
+          <span class="howto-icon">📷</span>
+          <p class="howto-text">Camera directly above, no shadows on the palm</p>
+        </div>
+        <div class="howto-item">
+          <span class="howto-icon">👁️</span>
+          <p class="howto-text">Right hand for future & present, left for past nature</p>
+        </div>
+      </div>
+
+      <!-- Dominance Selector -->
+      <div class="dominance-select-wrap">
+        <span class="dominance-label">Select Your Dominant Hand:</span>
+        <div class="dominance-options">
+          <label class="dom-option">
+            <input type="radio" name="dominance" value="right" checked>
+            <span>Right Hand</span>
+          </label>
+          <label class="dom-option">
+            <input type="radio" name="dominance" value="left">
+            <span>Left Hand</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+        
+        <span class="drop-icon">🖐</span>
+        <p class="drop-title">Place Your Palm Here</p>
+        <p class="drop-sub" style="margin-bottom:20px;">Tap to capture or upload a photo of your palm</p>
+        
+        <div class="upload-actions" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2;">
+          <button id="btnCamera" style="flex:1;min-width:140px;padding:12px;border-radius:30px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold-light);font-family:'Playfair Display',serif;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;">
+            <span style="font-size:1.2rem;">📷</span> Take Photo
+          </button>
+          <button id="btnGallery" style="flex:1;min-width:140px;padding:12px;border-radius:30px;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--text);font-family:'Playfair Display',serif;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;">
+            <span style="font-size:1.2rem;">📁</span> Upload
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview (hidden until file selected) -->
+      <div class="preview-grid" id="previewGrid" style="display:none">
+        <div class="preview-box" id="originalBox">
+          <div class="preview-box-label">Your Palm</div>
+          <div id="originalImg"></div>
+        </div>
+        <div class="preview-box" id="scannedBox">
+          <div class="preview-box-label">Line Analysis</div>
+          <div class="scan-overlay">
+            <div class="scan-beam" id="scanBeam"></div>
+          </div>
+          <div id="scannedImg"></div>
+        </div>
+      </div>
+
+      <!-- Analyze Button -->
+      <button class="btn-analyze" id="analyzeBtn" disabled onclick="analyze()">
+        ✦ &nbsp; Reveal My Destiny &nbsp; ✦
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-ritual" id="loadingSection" style="display:none">
+      <div class="ritual-mandala">
+        <svg viewBox="0 0 100 100" width="100" height="100" fill="none">
+          <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".4" />
+          <circle cx="50" cy="50" r="35" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 2" opacity=".6" />
+          <circle cx="50" cy="50" r="20" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+          <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+          <line x1="50" y1="3" x2="50" y2="97" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+          <line x1="3" y1="50" x2="97" y2="50" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+          <line x1="15" y1="15" x2="85" y2="85" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+          <line x1="85" y1="15" x2="15" y2="85" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+        </svg>
+      </div>
+      <p class="ritual-text" id="ritualText">Reading the sacred lines…</p>
+      <p class="ritual-sub" id="ritualSub">Krishnan Ashan is examining your palm</p>
+      <div class="ritual-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-wrap" id="resultSection" style="display:none">
+
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="confidence-badge medium" id="confidenceBadge">✦ Reading Complete</div>
+      </div>
+
+      <!-- Language Switcher -->
+      <div style="display:flex;justify-content:center">
+        <div class="lang-switcher">
+          <button class="lang-btn active" id="btnEn" onclick="switchLang('en')">📖 English</button>
+          <button class="lang-btn" id="btnMl" onclick="switchLang('ml')">📖 മലയാളം</button>
+        </div>
+      </div>
+
+      <!-- TTS -->
+      <div class="tts-control" id="ttsControl">
+        <span class="tts-label" id="ttsLabel">🔊 Hear the reading</span>
+        <button class="tts-btn" id="ttsPlayBtn" onclick="handleTtsPlay()">▶ Speak</button>
+        <button class="tts-btn" id="ttsPauseBtn" onclick="handleTtsPause()" disabled>⏸ Pause</button>
+        <button class="tts-btn" onclick="handleTtsStop()">⏹ Stop</button>
+        <div class="tts-waves" id="ttsWaves">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- English Reading -->
+      <div id="readingEn" class="reading-body"></div>
+      <!-- Malayalam Reading -->
+      <div id="readingMl" class="reading-body"
+        style="display:none;font-family:'Noto Sans Malayalam','Cormorant Garamond',serif"></div>
+
+      <!-- Retake -->
+      <div style="text-align:center">
+        <button class="btn-retake" onclick="resetApp()">↩ Read Another Palm</button>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="errorSection" style="display:none;width:100%;max-width:680px;margin-top:20px">
+      <div class="error-card">
+        <p id="errorMsg">Something went wrong. Please try again.</p>
+        <button class="btn-retake" onclick="resetApp()" style="margin-top:16px">↩ Try Again</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>ദൈവം നിങ്ങൾക്ക് നന്മ നൽകട്ടെ &nbsp;•&nbsp; May wisdom light your path</p>
+    </footer>
+  </div>
+
+  <!-- Hand Mismatch Warning Modal -->
+  <div id="confirmModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <h3>✦ Hand Mismatch Warning ✦</h3>
+      <p id="modalMsg"></p>
+      <div class="modal-actions">
+        <button class="modal-btn proceed" onclick="proceedAfterWarning()">Proceed Anyway</button>
+        <button class="modal-btn cancel" onclick="closeModal()">Go Back</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── COSMOS CANVAS ──────────────────────────────────────────────
+    const canvas = document.getElementById('cosmosCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [], particles = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+    function initStars() {
+      stars = Array.from({ length: 150 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        alpha: Math.random() * 0.6 + 0.1,
+        speed: Math.random() * 0.3 + 0.05,
+        phase: Math.random() * Math.PI * 2
+      }));
+      particles = Array.from({ length: 30 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - .5) * 0.2,
+        vy: (Math.random() - .5) * 0.2,
+        r: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.3 + 0.05
+      }));
+    }
+    function drawCosmos(t) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // nebula glow
+      const g1 = ctx.createRadialGradient(canvas.width * .2, canvas.height * .3, 0, canvas.width * .2, canvas.height * .3, canvas.width * .4);
+      g1.addColorStop(0, 'rgba(91,79,170,0.06)'); g1.addColorStop(1, 'transparent');
+      ctx.fillStyle = g1; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const g2 = ctx.createRadialGradient(canvas.width * .8, canvas.height * .7, 0, canvas.width * .8, canvas.height * .7, canvas.width * .4);
+      g2.addColorStop(0, 'rgba(201,168,76,0.04)'); g2.addColorStop(1, 'transparent');
+      ctx.fillStyle = g2; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      stars.forEach(s => {
+        s.alpha = 0.15 + 0.5 * (Math.sin(t * s.speed + s.phase) * .5 + .5);
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,230,211,${s.alpha})`; ctx.fill();
+      });
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,168,76,${p.alpha})`; ctx.fill();
+      });
+      requestAnimationFrame(t2 => drawCosmos(t2 / 1000));
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    requestAnimationFrame(t => drawCosmos(t / 1000));
+
+    // ── AMBIENT MUSIC (Web Audio API — mantra-style tone) ──────────
+    let audioCtx = null, masterGain = null, musicPlaying = false;
+    let oscillators = [], lfoNode = null, filterLfo = null;
+
+    function buildMantraAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 3);
+      masterGain.connect(audioCtx.destination);
+
+      // Reverb via convolver
+      const convolver = audioCtx.createConvolver();
+      const bufLen = audioCtx.sampleRate * 3;
+      const buf = audioCtx.createBuffer(2, bufLen, audioCtx.sampleRate);
+      for (let c = 0; c < 2; c++) {
+        const d = buf.getChannelData(c);
+        for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 2.5);
+      }
+      convolver.buffer = buf;
+      const convGain = audioCtx.createGain();
+      convGain.gain.value = 0.4;
+      masterGain.connect(convGain);
+      convGain.connect(convolver);
+      convolver.connect(audioCtx.destination);
+
+      // Lowpass filter to warm the sound and remove metallic buzz
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(450, audioCtx.currentTime);
+      filter.Q.setValueAtTime(1.0, audioCtx.currentTime);
+      filter.connect(masterGain);
+
+      // SA (root) drone — pure detuned sine waves (136Hz, 136.4Hz, 204Hz, 204.5Hz, 272Hz)
+      const freqs = [136, 136.4, 204, 204.5, 272];
+      freqs.forEach((f, i) => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        if (i === 0 || i === 1) {
+          g.gain.value = 0.35; // Root 136Hz
+        } else if (i === 2 || i === 3) {
+          g.gain.value = 0.25; // Fifth 204Hz
+        } else {
+          g.gain.value = 0.15; // Octave 272Hz
+        }
+        osc.connect(g); g.connect(filter);
+        osc.start();
+        oscillators.push({ osc, g });
+      });
+
+      // Slow meditation bell — tuned to exact harmonics of 136Hz (544Hz, 816Hz, 1088Hz)
+      function playBell() {
+        if (!musicPlaying) return;
+        const bellFreqs = [544, 816, 1088];
+        bellFreqs.forEach(f => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0, audioCtx.currentTime);
+          g.gain.linearRampToValueAtTime(0.015, audioCtx.currentTime + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 4);
+          o.connect(g); g.connect(filter);
+          o.start(); o.stop(audioCtx.currentTime + 4.5);
+        });
+        const delay = 8000 + Math.random() * 10000;
+        setTimeout(playBell, delay);
+      }
+      setTimeout(playBell, 4000);
+
+      // Slow LFO cutoff modulation to simulate deep breathing
+      filterLfo = audioCtx.createOscillator();
+      const filterLfoGain = audioCtx.createGain();
+      filterLfo.type = 'sine';
+      filterLfo.frequency.value = 0.05; // 20-second period
+      filterLfoGain.gain.value = 100; // Modulate cutoff frequency by +/- 100Hz
+      filterLfo.connect(filterLfoGain);
+      filterLfoGain.connect(filter.frequency);
+      filterLfo.start();
+
+      // LFO tremolo on master
+      lfoNode = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfoNode.frequency.value = 0.08;
+      lfoGain.gain.value = 0.012;
+      lfoNode.connect(lfoGain);
+      lfoGain.connect(masterGain.gain);
+      lfoNode.start();
+    }
+
+    function toggleMusic() {
+      const btn = document.getElementById('musicBtn');
+      const waves = document.getElementById('musicWaves');
+      if (!musicPlaying) {
+        if (!audioCtx) buildMantraAudio();
+        else {
+          audioCtx.resume();
+          masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          masterGain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 1);
+        }
+        musicPlaying = true;
+        btn.textContent = '⏸';
+        waves.classList.add('playing');
+      } else {
+        masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+        setTimeout(() => audioCtx.suspend(), 1600);
+        musicPlaying = false;
+        btn.textContent = '▶';
+        waves.classList.remove('playing');
+      }
+    }
+
+    // Automatically switch API URL based on where the app is running
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8000'
+      : 'https://hastha-rekha-api.onrender.com'; // <-- Change this once you have your real Render URL
+    let selectedFile = null;
+    let englishText = '', malayalamText = '';
+    let currentLang = 'en';
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const cameraInput = document.getElementById('cameraInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    document.getElementById('btnCamera').addEventListener('click', (e) => {
+      e.stopPropagation();
+      cameraInput.click();
+    });
+    
+    document.getElementById('btnGallery').addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    // Support clicking anywhere on the zone to fallback to gallery
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover') });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]) });
+    cameraInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]) });
+
+    function handleFile(file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const src = e.target.result;
+        document.getElementById('originalImg').innerHTML = `<img src="${src}" style="width:100%;display:block">`;
+        document.getElementById('scannedImg').innerHTML = `<img src="${src}" id="scannedImgEl" style="width:100%;display:block;filter:grayscale(1)contrast(1.4)">`;
+        document.getElementById('previewGrid').style.display = 'grid';
+      };
+      reader.readAsDataURL(file);
+      analyzeBtn.disabled = false;
+      setStep(1);
+    }
+
+    // ── STEP CONTROL ───────────────────────────────────────────────
+    function setStep(active) {
+      [1, 2, 3].forEach(n => {
+        const el = document.getElementById('step' + n);
+        el.classList.remove('active', 'done');
+        if (n < active) el.classList.add('done');
+        else if (n === active) el.classList.add('active');
+      });
+      [1, 2].forEach(n => {
+        const line = document.getElementById('line' + n);
+        if (n < active) line.classList.add('done');
+        else line.classList.remove('done');
+      });
+    }
+
+    // ── RITUAL LOADING MESSAGES ────────────────────────────────────
+    const ritualMessages = [
+      { t: 'Tracing the sacred lines…', s: 'Examining life, heart, and head lines' },
+      { t: 'Reading the planetary mounts…', s: 'Jupiter, Venus, Saturn speak their truth' },
+      { t: 'Consulting the ancient knowledge…', s: '30 years of wisdom, awakened' },
+      { t: 'Feeling the energy of your hand…', s: 'Krishnan Ashan is with you now' },
+      { t: 'Weaving your destiny story…', s: 'Almost ready to reveal what the lines say' },
+    ];
+    let ritualIdx = 0, ritualTimer = null;
+    function startRitualMessages() {
+      ritualIdx = 0;
+      updateRitual();
+      ritualTimer = setInterval(() => {
+        ritualIdx = (ritualIdx + 1) % ritualMessages.length;
+        updateRitual();
+      }, 3200);
+    }
+    function updateRitual() {
+      const m = ritualMessages[ritualIdx];
+      const el1 = document.getElementById('ritualText');
+      const el2 = document.getElementById('ritualSub');
+      el1.style.opacity = 0; el2.style.opacity = 0;
+      setTimeout(() => {
+        el1.textContent = m.t; el2.textContent = m.s;
+        el1.style.transition = 'opacity .5s'; el2.style.transition = 'opacity .5s';
+        el1.style.opacity = 1; el2.style.opacity = 1;
+      }, 300);
+    }
+    function stopRitualMessages() { clearInterval(ritualTimer) }
+
+    // ── ANALYZE ────────────────────────────────────────────────────
+    function showModal(msg) {
+      document.getElementById('modalMsg').textContent = msg;
+      document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').style.display = 'none';
+      document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'block';
+      document.getElementById('scannedBox').classList.remove('scanning');
+      setStep(1);
+    }
+
+    async function proceedAfterWarning() {
+      document.getElementById('confirmModal').style.display = 'none';
+      document.getElementById('loadingSection').style.display = 'block';
+      document.getElementById('scannedBox').classList.add('scanning');
+      setStep(2);
+      startRitualMessages();
+      if (!musicPlaying) toggleMusic();
+      await runFullAnalysis();
+    }
+
+    async function analyze() {
+      if (!selectedFile) return;
+      stopTts();
+      setStep(2);
+
+      // Show scanner
+      document.getElementById('scannedBox').classList.add('scanning');
+
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('loadingSection').style.display = 'block';
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('errorSection').style.display = 'none';
+
+      // Start with a hand detection message
+      document.getElementById('ritualText').textContent = "Confirming hand orientation...";
+      document.getElementById('ritualSub').textContent = "Analyzing shape and alignment";
+
+      const form = new FormData();
+      form.append('file', selectedFile);
+
+      try {
+        const res = await fetch(`${API_URL}/detect-hand`, { method: 'POST', body: form });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          const detected = data.detected_hand; // 'left', 'right', 'undetermined'
+          const selected = document.querySelector('input[name="dominance"]:checked').value;
+
+          if (detected !== 'undetermined' && detected !== selected) {
+            // Mismatch! Show modal
+            document.getElementById('scannedBox').classList.remove('scanning');
+            const selectedLabel = selected === 'left' ? 'Left Hand' : 'Right Hand';
+            const detectedLabel = detected === 'left' ? 'Left Hand' : 'Right Hand';
+            showModal(`You selected your hand as "${selectedLabel}", but our analysis detected a "${detectedLabel}". Palm readings are most accurate when using the correct hand. Do you want to proceed anyway or go back and change your choice?`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Hand detection failed, proceeding directly to analysis:", err);
+      }
+
+      // If no mismatch or detection skipped, start ritual and run analysis
+      startRitualMessages();
+      if (!musicPlaying) toggleMusic();
+      await runFullAnalysis();
+    }
+
+    async function runFullAnalysis() {
+      const form = new FormData();
+      form.append('file', selectedFile);
+
+      try {
+        const res = await fetch(`${API_URL}/analyze-palm`, { method: 'POST', body: form });
+        const data = await res.json();
+        stopRitualMessages();
+        document.getElementById('scannedBox').classList.remove('scanning');
+
+        if (data.status === 'success') {
+          if (data.scanned_image) {
+            const el = document.getElementById('scannedImgEl');
+            if (el) { el.src = data.scanned_image; el.style.filter = 'none'; }
+          }
+          parseAndRender(data.reading);
+          setStep(3);
+        } else {
+          showError(data.message || 'Analysis failed');
+        }
+      } catch (err) {
+        stopRitualMessages();
+        showError('Could not connect to server. Is the backend running?');
+      } finally {
+        document.getElementById('loadingSection').style.display = 'none';
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = '🔮 ' + msg;
+      document.getElementById('errorSection').style.display = 'block';
+      document.getElementById('uploadSection').style.display = 'block';
+      analyzeBtn.disabled = false;
+    }
+
+    // ── PARSE + RENDER ─────────────────────────────────────────────
+    function parseAndRender(raw) {
+      const parts = raw.split(/===MALAYALAM_READING_SPLIT===/i);
+      if (parts.length >= 2) {
+        englishText = parts[0].trim();
+        malayalamText = parts.slice(1).join('\n').trim();
+      } else {
+        englishText = raw;
+        malayalamText = 'Malayalam reading unavailable.';
+      }
+
+      // Detect confidence
+      const confMatch = englishText.match(/Confidence Level:\s*(High|Medium|Low)/i);
+      if (confMatch) {
+        const cb = document.getElementById('confidenceBadge');
+        const c = confMatch[1].toLowerCase();
+        cb.className = `confidence-badge ${c}`;
+        cb.textContent = `✦ Confidence: ${confMatch[1]}`;
+      }
+
+      renderReading('en');
+      document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('resultSection').style.display = 'block';
+
+      // smooth scroll
+      setTimeout(() => {
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    }
+
+    function renderReading(lang) {
+      const raw = lang === 'en' ? englishText : malayalamText;
+      const container = lang === 'en' ? 'readingEn' : 'readingMl';
+      const html = formatReading(raw);
+      document.getElementById(container).innerHTML = html;
+
+      // Stagger section animations
+      const sections = document.querySelectorAll(`#${container} .r-section`);
+      sections.forEach((s, i) => { s.style.animationDelay = `${i * 0.12}s` });
+
+      // Update TTS label
+      document.getElementById('ttsLabel').textContent =
+        lang === 'en' ? '🔊 Hear the reading (English)' : '🔊 വായന കേൾക്കാം (Malayalam)';
+      document.getElementById('ttsPlayBtn').textContent =
+        lang === 'en' ? '▶ Speak' : '▶ കേൾക്കുക';
+    }
+
+    function formatReading(text) {
+      // Remove section headers like "SECTION 1: ..."
+      text = text.replace(/SECTION \d[^:\n]*:[^\n]*/gi, '');
+      // Remove confidence line from body
+      text = text.replace(/Confidence Level:[^\n]*/gi, '');
+      text = text.replace(/വിശ്വാസ്യതാ നില:[^\n]*/gi, '');
+      // Remove separator lines
+      text = text.replace(/═+/g, '').replace(/━+/g, '');
+
+      const lines = text.split('\n');
+      let html = '';
+      let inSection = false;
+      let sectionContent = '';
+      let sectionTitle = '';
+
+      function closeSection() {
+        if (inSection) {
+          html += `<div class="r-section"><h3>${sectionTitle}</h3>${formatParagraphs(sectionContent)}</div>`;
+          sectionContent = '';
+        }
+      }
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        // heading detection: ### or #### or lines in ALL CAPS ending with colon
+        const headMatch = line.match(/^#{1,4}\s+(.+)/);
+        if (headMatch) {
+          closeSection();
+          inSection = true;
+          sectionTitle = cleanHeading(headMatch[1]);
+          sectionContent = '';
+          continue;
+        }
+        if (inSection) {
+          sectionContent += line + '\n';
+        } else {
+          // Intro / greeting before first heading
+          if (line.length > 10) {
+            html += `<div class="r-greeting">${escHtml(line)}</div>`;
+          }
+        }
+      }
+      closeSection();
+      return html;
+    }
+
+    function formatParagraphs(text) {
+      return text.split('\n')
+        .map(l => l.trim())
+        .filter(l => l)
+        .map(l => `<p>${escHtml(l)}</p>`)
+        .join('');
+    }
+
+    function cleanHeading(h) {
+      return h.replace(/\*+/g, '').replace(/:$/, '').trim();
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    }
+
+    // ── LANGUAGE SWITCH ────────────────────────────────────────────
+    window.switchLang = function (lang) {
+      currentLang = lang;
+      stopTts();
+      document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+      document.getElementById('btnMl').classList.toggle('active', lang === 'ml');
+      document.getElementById('readingEn').style.display = lang === 'en' ? 'block' : 'none';
+      document.getElementById('readingMl').style.display = lang === 'ml' ? 'block' : 'none';
+      if (lang === 'ml' && !document.getElementById('readingMl').innerHTML) {
+        renderReading('ml');
+      }
+      renderReading(lang);
+    };
+
+    // ── TTS ────────────────────────────────────────────────────────
+    let ttsChunks = [], ttsIdx = 0, ttsPaused = false, ttsAudio = null, nextTtsAudio = null, ttsActive = false;
+
+    function getReadingText() {
+      return currentLang === 'en' ? englishText : malayalamText;
+    }
+
+    function cleanForTts(t) {
+      return t.replace(/#{1,4}/g, '').replace(/\*+/g, '').replace(/═+/g, '').replace(/━+/g, '')
+        .replace(/---MALAYALAM---/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function handleTtsPlay() {
+      stopTts();
+      const text = cleanForTts(getReadingText());
+      if (currentLang === 'ml') {
+        const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+        const hasMlVoice = voices.some(v => v.lang.toLowerCase().includes('ml'));
+        if (hasMlVoice) {
+          startBrowserTts(text, 'ml-IN');
+        } else {
+          startGoogleTts(text, 'ml');
+        }
+      } else {
+        startBrowserTts(text, 'en-US');
+      }
+    }
+
+    function handleTtsPause() {
+      if (ttsAudio) {
+        if (ttsAudio.paused) { ttsAudio.play(); }
+        else { ttsAudio.pause(); }
+      } else if (window.speechSynthesis) {
+        if (speechSynthesis.paused) speechSynthesis.resume();
+        else speechSynthesis.pause();
+      }
+    }
+
+    function handleTtsStop() { stopTts(); }
+
+    function stopTts() {
+      ttsActive = false; ttsPaused = false;
+      if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+      if (nextTtsAudio) { nextTtsAudio.pause(); nextTtsAudio = null; }
+      if (window.speechSynthesis) speechSynthesis.cancel();
+      document.getElementById('ttsWaves').classList.remove('active');
+      document.getElementById('ttsPauseBtn').disabled = true;
+      document.getElementById('ttsPlayBtn').disabled = false;
+    }
+
+    function setTtsPlaying(on) {
+      document.getElementById('ttsWaves').classList.toggle('active', on);
+      document.getElementById('ttsPauseBtn').disabled = !on;
+      document.getElementById('ttsPlayBtn').disabled = on;
+    }
+
+    function startGoogleTts(text, lang) {
+      // chunk by sentences
+      ttsChunks = text.match(/[^.!?।\n]{1,150}[.!?।\n]?/g) || [text];
+      ttsChunks = ttsChunks.map(s => s.trim()).filter(s => s.length > 2);
+      ttsIdx = 0; ttsActive = true;
+      setTtsPlaying(true);
+      playChunk(lang);
+    }
+
+    function playChunk(lang) {
+      if (!ttsActive || ttsIdx >= ttsChunks.length) { stopTts(); return; }
+
+      if (nextTtsAudio && nextTtsAudio.dataset.idx === String(ttsIdx)) {
+        ttsAudio = nextTtsAudio;
+        nextTtsAudio = null;
+      } else {
+        const encoded = encodeURIComponent(ttsChunks[ttsIdx]);
+        const url = `${API_URL}/tts?text=${encoded}&lang=${lang}`;
+        ttsAudio = new Audio(url);
+        ttsAudio.preservesPitch = false;
+        ttsAudio.playbackRate = 0.82;
+      }
+
+      setTtsPlaying(true);
+
+      ttsAudio.play().then(() => {
+        // Preload next sentence chunk
+        const nextIdx = ttsIdx + 1;
+        if (nextIdx < ttsChunks.length) {
+          const nextEncoded = encodeURIComponent(ttsChunks[nextIdx]);
+          const nextUrl = `${API_URL}/tts?text=${nextEncoded}&lang=${lang}`;
+          nextTtsAudio = new Audio(nextUrl);
+          nextTtsAudio.dataset.idx = String(nextIdx);
+          nextTtsAudio.preservesPitch = false;
+          nextTtsAudio.playbackRate = 0.82;
+          nextTtsAudio.load();
+        }
+
+        ttsAudio.onended = () => { ttsIdx++; playChunk(lang); };
+      }).catch(() => {
+        ttsIdx++; playChunk(lang);
+      });
+
+      ttsAudio.onerror = () => { ttsIdx++; playChunk(lang); };
+    }
+
+    function startBrowserTts(text, lang) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = lang;
+      // Lower pitch (0.65) and slower rate (0.76) to simulate a 65-70 year old voice
+      utter.rate = 0.76;
+      utter.pitch = 0.65;
+
+      const voices = speechSynthesis.getVoices();
+
+      // Try to find a male voice first (e.g. including 'male', 'valluvan', 'ravi', or 'david')
+      let v = voices.find(v =>
+        v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]) &&
+        (v.name.toLowerCase().includes('male') ||
+          v.name.toLowerCase().includes('valluvan') ||
+          v.name.toLowerCase().includes('ravi') ||
+          v.name.toLowerCase().includes('david'))
+      );
+
+      if (!v) {
+        v = voices.find(v => v.lang.toLowerCase() === lang.toLowerCase());
+      }
+      if (!v) {
+        v = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]));
+      }
+      if (!v && lang.startsWith('en')) {
+        v = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('en-GB'));
+      }
+      if (v) utter.voice = v;
+
+      utter.onstart = () => setTtsPlaying(true);
+      utter.onend = utter.onerror = () => stopTts();
+      speechSynthesis.speak(utter);
+      setTtsPlaying(true);
+    }
+
+    // ── RESET ──────────────────────────────────────────────────────
+    function resetApp() {
+      stopTts();
+      selectedFile = null;
+      englishText = ''; malayalamText = '';
+      fileInput.value = '';
+      analyzeBtn.disabled = true;
+      document.getElementById('previewGrid').style.display = 'none';
+      document.getElementById('originalImg').innerHTML = '';
+      document.getElementById('scannedImg').innerHTML = '';
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('errorSection').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'block';
+      document.getElementById('readingEn').innerHTML = '';
+      document.getElementById('readingMl').innerHTML = '';
+      switchLang('en');
+      setStep(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // voices preload
+    if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { };
+  </script>
+</body>
+
+</html>
