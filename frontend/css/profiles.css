@@ -1,0 +1,223 @@
+/* profiles.css */
+
+.profile-bar {
+  background: var(--surf);
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 13px;
+  color: var(--text-d);
+  z-index: 100;
+  position: relative;
+}
+
+.profile-bar .profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-bar .profile-name {
+  color: var(--text);
+  font-weight: bold;
+}
+
+.profile-bar .profile-btn {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+
+.profile-bar .profile-btn:hover {
+  background: var(--gold);
+  color: var(--surf);
+}
+
+/* Profile Selector Modal */
+.profile-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.profile-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.profile-modal-content {
+  background: var(--parchment, #080510);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-family: var(--font-body, 'EB Garamond', serif);
+  color: var(--ink, #f0e6d3);
+}
+
+.profile-modal-close {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: none; border: none;
+  color: var(--text-d);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.profile-modal-content h3 {
+  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-size: 28px;
+  margin: 0 0 20px;
+  color: var(--text);
+  text-align: center;
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.profile-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--gold-dim);
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.profile-item:hover {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.1);
+}
+
+.profile-item.active {
+  border-color: var(--text);
+  background: rgba(201, 168, 76, 0.2);
+}
+
+.profile-item-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-item-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.profile-item-meta {
+  font-size: 13px;
+  color: var(--text-d);
+  font-family: var(--font-mono, monospace);
+  margin-top: 4px;
+}
+
+.add-profile-btn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px dashed var(--gold);
+  color: var(--gold);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.add-profile-btn:hover {
+  background: rgba(201, 168, 76, 0.1);
+}
+
+/* Form Styles */
+.profile-form {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.profile-form.active {
+  display: flex;
+}
+
+.profile-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.profile-form-group label {
+  font-size: 14px;
+  color: var(--text-d);
+}
+
+.profile-form-group input, .profile-form-group select {
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--gold-dim);
+  border-radius: 4px;
+  color: var(--ink, #f0e6d3);
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+}
+
+.profile-form-group input:focus, .profile-form-group select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.profile-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-primary {
+  flex: 1;
+  background: var(--gold);
+  color: var(--surf);
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  color: var(--ink, #f0e6d3);
+  border: 1px solid var(--gold-dim);
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}

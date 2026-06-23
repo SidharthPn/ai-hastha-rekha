@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="palm_page_title">ഹസ്തരേഖ — AI Palm Reader</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Sans+Malayalam:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/palm.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/profiles.css">
+</head>
+
+<body>
+  <!-- cosmos canvas -->
+  <canvas id="cosmosCanvas"></canvas>
+
+  <!-- mobile nav drawer -->
+  <div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+    <button class="nav-drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    <a href="index.html" onclick="closeDrawer()"><span data-i18n="nav_home">Home</span></a>
+    <a href="palm.html" onclick="closeDrawer()">Palm Reading</a>
+    <a href="kili.html" onclick="closeDrawer()">Kili Josyam</a>
+    <a href="horoscope.html" onclick="closeDrawer()">Horoscope</a>
+    <a href="daily.html" onclick="closeDrawer()">Daily</a>
+    <a href="guru.html" onclick="closeDrawer()">AI Guru</a>
+  </div>
+
+  <div class="page">
+
+    <!-- NAV -->
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="index.html">
+          <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+            <g opacity=".6">
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+            </g>
+            <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+            <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          </svg>
+          <span data-i18n="site_title">Jyotish AI</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html"><span data-i18n="nav_home">Home</span></a></li>
+          <li><a href="palm.html"><span data-i18n="nav_palm">Palm Reading</span></a></li>
+          <li><a href="kili.html"><span data-i18n="nav_kili">Kili Josyam</span></a></li>
+          <li><a href="horoscope.html"><span data-i18n="nav_horo">Horoscope</span></a></li>
+          <li><a href="daily.html"><span data-i18n="nav_daily">Daily Dashboard</span></a></li>
+          <li><a href="guru.html"><span data-i18n="nav_guru">AI Guru</span></a></li>
+        </ul>
+        <button class="nav-cta" id="themeToggler" style="margin-right:10px;" aria-label="Toggle Theme">☾ / ☀</button>
+        <button class="nav-cta" id="langToggler" style="margin-right:10px;">മലയാളം</button>
+        <button class="nav-cta" onclick="window.location.href='palm.html'" data-i18n="nav_cta">✦ Begin Journey</button>
+        <button class="nav-burger" id="burgerBtn" onclick="openDrawer()" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Ambient Music -->
+    <div class="music-bar" id="musicBar">
+      <button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle ambient music">▶</button>
+      <span class="music-label">Mantra Ambience</span>
+      <div class="music-waves" id="musicWaves">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="app">
+
+      <!-- Hero -->
+      <header class="hero">
+        <div class="yantra">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="0.6" opacity=".5" />
+            <circle cx="50" cy="50" r="40" stroke="#c9a84c" stroke-width="0.4" stroke-dasharray="3 3" opacity=".4" />
+            <circle cx="50" cy="50" r="30" stroke="#c9a84c" stroke-width="0.6" opacity=".4" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".7" />
+            <!-- 8-petal lotus -->
+            <g opacity=".55">
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+            </g>
+            <!-- triangle -->
+            <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+            <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          </svg>
+        </div>
+        <h1 data-i18n="palm_tag">Hastha Rekha</h1>
+        <p class="hero-sub" data-i18n="palm_title_sub">Hastha Rekha • AI Palm Reading</p>
+        <div class="divider"></div>
+
+
+      </header>
+
+      <!-- Step Indicator -->
+      <div class="steps" id="stepIndicator">
+        <div class="step active" id="step1">
+          <div class="step-dot">1</div>
+          <div class="step-label" data-i18n="palm_step1">Upload</div>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2">
+          <div class="step-dot">2</div>
+          <div class="step-label" data-i18n="palm_step2">Analyze</div>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3">
+          <div class="step-dot">3</div>
+          <div class="step-label" data-i18n="palm_step3">Reading</div>
+        </div>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-card" id="uploadSection">
+
+        <!-- Language Toggle -> We now use the global Language preference from Hub -->
+        <div class="lang-toggle" style="display: none;">
+          <span id="labelEn" class="active">English</span>
+        </div>
+
+        <!-- How-to guide -->
+        <div class="howto">
+          <div class="howto-item">
+            <span class="howto-icon">☀️</span>
+            <p class="howto-text" data-i18n="palm_tip1">Good natural light — near a window works best</p>
+          </div>
+          <div class="howto-item">
+            <span class="howto-icon">✋</span>
+            <p class="howto-text" data-i18n="palm_tip2">Open palm, fingers relaxed and slightly spread</p>
+          </div>
+          <div class="howto-item">
+            <span class="howto-icon">📷</span>
+            <p class="howto-text" data-i18n="palm_tip3">Camera directly above, no shadows on the palm</p>
+          </div>
+          <div class="howto-item">
+            <span class="howto-icon">👁️</span>
+            <p class="howto-text" data-i18n="palm_tip4">Right hand for future & present, left for past nature</p>
+          </div>
+        </div>
+        <!-- Astrology Insights Toggle -->
+        <div class="dob-select-wrap" style="margin-bottom: 20px;">
+          <label
+            style="color: var(--ink-soft); font-family: var(--font-body); display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="includeAstrology" style="accent-color: var(--gold);">
+            <span data-i18n="palm_include_astro">Include Astrological Insights (Requires Profile)</span>
+          </label>
+        </div>
+
+        <!-- Dominance Selector -->
+        <div class="dominance-select-wrap">
+          <span class="dominance-label" data-i18n="palm_dominance">Select Your Dominant Hand:</span>
+          <div class="dominance-options">
+            <label class="dom-option">
+              <input type="radio" name="dominance" value="right" checked>
+              <span data-i18n="palm_right">Right Hand</span>
+            </label>
+            <label class="dom-option">
+              <input type="radio" name="dominance" value="left">
+              <span data-i18n="palm_left">Left Hand</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+          <span class="drop-icon">🖐</span>
+          <p class="drop-title" data-i18n="palm_drop_title">Place Your Palm Here</p>
+          <p class="drop-sub" style="margin-bottom:20px;" data-i18n="palm_drop_sub">Tap to capture or upload a photo of
+            your palm</p>
+
+          <div class="upload-actions">
+
+            <div class="upload-action-wrap">
+              <input type="file" id="cameraInput" accept="image/*" capture="environment">
+              <button type="button" class="upload-btn upload-btn-primary">
+                <span style="font-size:1.2rem;"></span> <span data-i18n="palm_take_photo">Take Photo</span>
+              </button>
+            </div>
+
+            <div class="upload-action-wrap">
+              <input type="file" id="fileInput" accept="image/*">
+              <button type="button" class="upload-btn upload-btn-secondary">
+                <span style="font-size:1.2rem;"></span> <span data-i18n="palm_upload">Upload</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Preview (hidden until file selected) -->
+        <div class="preview-grid" id="previewGrid" style="display:none">
+          <div class="preview-box" id="originalBox">
+            <div class="preview-box-label" data-i18n="palm_your_palm">Your Palm</div>
+            <div id="originalImg"></div>
+          </div>
+          <div class="preview-box" id="scannedBox">
+            <div class="preview-box-label" data-i18n="palm_line_analysis">Line Analysis</div>
+            <div class="scan-overlay">
+              <div class="scan-beam" id="scanBeam"></div>
+            </div>
+            <div id="scannedImg"></div>
+          </div>
+        </div>
+
+        <!-- Analyze Button -->
+        <button class="btn-analyze" id="analyzeBtn" disabled onclick="analyze()" data-i18n="palm_analyze_btn">
+          ✦ &nbsp; Reveal My Destiny &nbsp; ✦
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-ritual" id="loadingSection" style="display:none">
+        <div class="ritual-mandala">
+          <svg viewBox="0 0 100 100" width="100" height="100" fill="none">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".4" />
+            <circle cx="50" cy="50" r="35" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 2" opacity=".6" />
+            <circle cx="50" cy="50" r="20" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+            <line x1="50" y1="3" x2="50" y2="97" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+            <line x1="3" y1="50" x2="97" y2="50" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+            <line x1="15" y1="15" x2="85" y2="85" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+            <line x1="85" y1="15" x2="15" y2="85" stroke="#c9a84c" stroke-width="0.5" opacity=".3" />
+          </svg>
+        </div>
+        <p class="ritual-text" id="ritualText" data-i18n="palm_ritual_text">Reading the sacred lines…</p>
+        <p class="ritual-sub" id="ritualSub" data-i18n="palm_ritual_sub">Krishnan Ashan is examining your palm</p>
+        <div class="ritual-dots"><span></span><span></span><span></span></div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-wrap" id="resultSection" style="display:none">
+
+        <div style="text-align:center;margin-bottom:24px">
+          <div class="confidence-badge medium" id="confidenceBadge" data-i18n="palm_reading_complete">✦ Reading Complete
+          </div>
+        </div>
+
+        <!-- Language Switcher (Hidden as language is selected in Hub) -->
+        <div style="display:none;justify-content:center">
+          <div class="lang-switcher">
+            <button class="lang-btn active" id="btnEn" onclick="switchLang('en')">📖 English</button>
+            <button class="lang-btn" id="btnMl" onclick="switchLang('ml')">📖 മലയാളം</button>
+          </div>
+        </div>
+
+        <!-- TTS -->
+        <div class="tts-control" id="ttsControl">
+          <span class="tts-label" id="ttsLabel" data-i18n="palm_tts_label">🔊 Hear the reading</span>
+          <button class="tts-btn" id="ttsPlayBtn" onclick="handleTtsPlay()" data-i18n="palm_speak">▶ Speak</button>
+          <button class="tts-btn" id="ttsPauseBtn" onclick="handleTtsPause()" disabled data-i18n="palm_pause">⏸
+            Pause</button>
+          <button class="tts-btn" onclick="handleTtsStop()" data-i18n="palm_stop">⏹ Stop</button>
+          <div class="tts-waves" id="ttsWaves">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- English Reading -->
+        <div id="readingEn" class="reading-body"></div>
+        <!-- Malayalam Reading -->
+        <div id="readingMl" class="reading-body"
+          style="display:none;font-family:'Noto Sans Malayalam','Cormorant Garamond',serif"></div>
+
+        <!-- Retake -->
+        <div style="text-align:center">
+          <button class="btn-retake" onclick="resetApp()" data-i18n="palm_retake">↩ Read Another Palm</button>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="errorSection" style="display:none;width:100%;max-width:680px;margin-top:20px">
+        <div class="error-card">
+          <p id="errorMsg" data-i18n="palm_error">Something went wrong. Please try again.</p>
+          <button class="btn-retake" onclick="resetApp()" style="margin-top:16px" data-i18n="palm_try_again">↩ Try
+            Again</button>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p data-i18n="palm_footer">ദൈവം നിങ്ങൾക്ക് നന്മ നൽകട്ടെ &nbsp;•&nbsp; May wisdom light your path</p>
+      </footer>
+    </div>
+
+    <!-- Hand Mismatch Warning Modal -->
+    <div id="confirmModal" class="modal" style="display:none">
+      <div class="modal-content">
+        <h3 data-i18n="palm_mismatch_title">✦ Hand Mismatch Warning ✦</h3>
+        <p id="modalMsg"></p>
+        <div class="modal-actions">
+          <button class="modal-btn proceed" onclick="proceedAfterWarning()" data-i18n="palm_mismatch_proceed">Proceed
+            Anyway</button>
+          <button class="modal-btn cancel" onclick="closeModal()" data-i18n="palm_mismatch_back">Go Back</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/profiles.js"></script>
+    <script src="js/palm.js?v=2"></script>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="foot-logo" data-i18n="site_title">Jyotish AI</div>
+      <ul class="foot-links">
+        <li><a href="palm.html">Palm Reading</a></li>
+        <li><a href="kili.html">Kili Josyam</a></li>
+        <li><a href="horoscope.html">Horoscope</a></li>
+        <li><a href="daily.html">Daily Dashboard</a></li>
+        <li><a href="challenges.html">Challenges</a></li>
+        <li><a href="mantra.html">Mantra</a></li>
+        <li><a href="guru.html">AI Guru</a></li>
+      </ul>
+      <p class="foot-copy">
+        <span data-i18n="foot_copy">May wisdom light your path<br>© 2026 Jyotish AI · For spiritual guidance only · Not
+          a substitute for professional advice</span>
+      </p>
+    </footer>
+
+  </div><!-- /.page -->
+
+  <script src="js/i18n.js?v=2"></script>
+  <script src="js/script.js?v=2"></script>
+</body>
+
+</html>

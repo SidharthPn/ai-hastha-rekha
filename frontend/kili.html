@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="kili_title">Kili Josyam - Parrot Astrology</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&family=Noto+Sans+Malayalam:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/kili-josyam.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profiles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="js/i18n.js?v=2"></script>
+  <script src="js/profiles.js"></script>
+  <script src="js/kili-josyam.js?v=2"></script>
+  <script src="js/script.js?v=2"></script>
+</head>
+
+<body>
+  <!-- cosmos canvas -->
+  <canvas id="cosmosCanvas"></canvas>
+
+  <!-- ambient music -->
+  <div class="music-bar">
+    <button class="music-btn" id="musicBtn" onclick="toggleMusic()" aria-label="Toggle ambient music">▶</button>
+    <span class="music-label">Mantra Ambience</span>
+    <div class="music-waves" id="musicWaves">
+      <span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- mobile nav drawer -->
+  <div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+    <button class="nav-drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    <a href="index.html" onclick="closeDrawer()"><span data-i18n="nav_home">Home</span></a>
+    <a href="palm.html" onclick="closeDrawer()">Palm Reading</a>
+    <a href="kili.html" onclick="closeDrawer()">Kili Josyam</a>
+    <a href="horoscope.html" onclick="closeDrawer()">Horoscope</a>
+    <a href="daily.html" onclick="closeDrawer()">Daily</a>
+    <a href="guru.html" onclick="closeDrawer()">AI Guru</a>
+  </div>
+
+  <div class="page">
+
+    <!-- NAV -->
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="index.html">
+          <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+            <g opacity=".6">
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+            </g>
+            <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+            <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          </svg>
+          <span data-i18n="site_title">Jyotish AI</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html"><span data-i18n="nav_home">Home</span></a></li>
+          <li><a href="palm.html"><span data-i18n="nav_palm">Palm Reading</span></a></li>
+          <li><a href="kili.html"><span data-i18n="nav_kili">Kili Josyam</span></a></li>
+          <li><a href="horoscope.html"><span data-i18n="nav_horo">Horoscope</span></a></li>
+          <li><a href="daily.html"><span data-i18n="nav_daily">Daily Dashboard</span></a></li>
+          <li><a href="guru.html"><span data-i18n="nav_guru">AI Guru</span></a></li>
+        </ul>
+        <button class="nav-cta" id="themeToggler" style="margin-right:10px;" aria-label="Toggle Theme">☾ / ☀</button>
+        <button class="nav-cta" id="langToggler" style="margin-right:10px;">മലയാളം</button>
+        <button class="nav-cta" onclick="window.location.href='palm.html'" data-i18n="nav_cta">✦ Begin Journey</button>
+        <button class="nav-burger" id="burgerBtn" onclick="openDrawer()" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="bg-temple"></div>
+
+    <header>
+      <h1 data-i18n="kili_title">Kili Josyam</h1>
+      <p data-i18n="kili_subtitle">Seek cosmic guidance from the mystical Kerala Parrot Astrologer. Step into the
+        ancient tradition.</p>
+    </header>
+
+    <!-- Audio elements -->
+    <audio id="audio-bell" src="assets/temple_bell.mp3" preload="auto"></audio>
+
+    <!-- SCREEN 1: Input -->
+    <div class="screen active" id="screen1">
+      <h1 class="glow-text"></h1>
+      <!-- <p class="subtitle" data-i18n="kili_subtitle"></p> -->
+      <div class="input-area">
+        <button id="btn-begin" class="btn-primary" data-i18n="kili_seek">Seek Guidance</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: The Ritual -->
+    <div id="screen2" class="screen">
+
+      <div class="mystic-stage">
+        <div id="cage-display">
+          <img id="cage-img" src="assets/images/parrot-closed.png" alt="Closed Cage">
+        </div>
+        <div id="door-display" style="display: none;">
+          <img id="door-img" src="assets/images/open-door.png" alt="Open Cage">
+        </div>
+        <div id="bird-area" style="display: none;">
+          <!-- Three.js canvas will be injected here -->
+        </div>
+      </div>
+
+      <button id="btn-open-cage" class="btn-mystic" style="margin-top: 20px; z-index: 20;"
+        data-i18n="kili_open_cage">Open the Cage</button>
+
+      <div class="cards-wrapper" id="cards-container">
+        <!-- Cards generated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Reading Result -->
+    <div id="screen3" class="screen">
+      <div class="reading-container">
+        <div id="result-rarity-banner" class="rarity-banner"></div>
+        <div id="result-icon" class="result-icon" style="font-size: 5rem; margin-bottom: 10px;"></div>
+        
+        <div id="result-card-visual" style="display: none; position: relative; width: 250px; height: 350px; margin: 0 auto 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <!-- Background Fire Fly -->
+          <img id="card-bg-overlay" src="assets/images/common/fire fly.jpg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" alt="Cosmic Background">
+          <!-- The Dynamic Frame Overlay -->
+          <img id="card-frame-overlay" src="assets/images/common.jpg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; filter: brightness(1.05) contrast(1.05); z-index: 1;" alt="Card Frame">
+          <!-- The Base Card Image -->
+          <img id="card-base-img" src="assets/images/common/common.png" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55%; height: auto; z-index: 2; border-radius: 6px; box-shadow: 0 5px 25px rgba(0,0,0,0.7); filter: brightness(1.1) contrast(1.1);" alt="Card Base">
+        </div>
+        <h2 id="result-name">Card Name</h2>
+        <div id="result-theme">Theme</div>
+        <div id="kili-tokens" style="color:var(--kili-gold); font-size:0.9rem; margin-top:10px;"></div>
+
+        <div id="loading-reading" class="loader">
+          <div class="spinner"></div>
+          <p style="margin-top: 15px; color: var(--kili-gold); font-style: italic;" data-i18n="kili_divining">The parrot
+            is divining your fate...
+          </p>
+        </div>
+
+        <div id="reading-content" class="reading-content" style="display: none;">
+          <h3 data-i18n="kili_meaning">Meaning</h3>
+          <p id="read-meaning"></p>
+
+          <h3 data-i18n="kili_insight">Cosmic Insight</h3>
+          <p id="read-insights"
+            style="color: #e2e8f0; font-style: italic; background: rgba(0,0,0,0.3); padding: 15px; border-left: 3px solid var(--kili-gold); border-radius: 4px;">
+          </p>
+
+          <div class="wisdom-block"
+            style="margin: 20px 0; padding: 15px; background: rgba(201, 168, 76, 0.1); border-radius: 8px; border: 1px dashed var(--kili-gold-dim);">
+            <h3 style="margin-top: 0;" data-i18n="kili_wisdom">Traditional Wisdom</h3>
+            <p id="read-wisdom-sanskrit" class="sanskrit-text"
+              style="font-size: 1.2rem; margin-bottom: 5px; color: var(--kili-gold);"></p>
+            <p id="read-wisdom-english" class="english-text" style="font-style: italic;"></p>
+          </div>
+
+          <h3 data-i18n="kili_guidance">Guidance</h3>
+          <p id="read-guidance"></p>
+
+          <div class="reflection-block"
+            style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #a3b8cc;" data-i18n="kili_reflection">Reflection</h3>
+            <p id="read-reflection" style="font-size: 1.1rem; color: #fff;"></p>
+          </div>
+
+          <div style="text-align: center; margin-top: 40px;">
+            <button id="btn-restart" class="btn-mystic" data-i18n="kili_consult_again">Consult Again</button>
+            <br><br>
+            <a href="index.html"
+              style="color: var(--kili-gold-dim); text-decoration: none; font-family: 'Inter', sans-serif;"
+              data-i18n="palm_hub_back">← Return to
+              Astro Hub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="foot-logo" data-i18n="site_title">Jyotish AI</div>
+      <ul class="foot-links">
+        <li><a href="palm.html">Palm Reading</a></li>
+        <li><a href="kili.html">Kili Josyam</a></li>
+        <li><a href="horoscope.html">Horoscope</a></li>
+        <li><a href="daily.html">Daily Dashboard</a></li>
+        <li><a href="challenges.html">Challenges</a></li>
+        <li><a href="mantra.html">Mantra</a></li>
+        <li><a href="guru.html">AI Guru</a></li>
+      </ul>
+      <p class="foot-copy">
+        <span data-i18n="foot_copy">May wisdom light your path<br>© 2026 Jyotish AI · For spiritual guidance only · Not
+          a substitute for professional advice</span>
+      </p>
+    </footer>
+
+  </div><!-- /.page -->
+
+</body>
+
+</html>

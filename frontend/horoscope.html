@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="horo_title">Daily Horoscope - Jyotish AI</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Noto+Sans+Malayalam:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/horoscope.css?v=2">
+  <link rel="stylesheet" href="css/profiles.css">
+</head>
+<body>
+  <!-- cosmos canvas -->
+  <canvas id="cosmosCanvas"></canvas>
+
+  <!-- mobile nav drawer -->
+    <div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+    <button class="nav-drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    <a href="index.html" onclick="closeDrawer()"><span data-i18n="nav_home">Home</span></a>
+    <a href="palm.html" onclick="closeDrawer()">Palm Reading</a>
+    <a href="kili.html" onclick="closeDrawer()">Kili Josyam</a>
+    <a href="horoscope.html" onclick="closeDrawer()">Horoscope</a>
+    <a href="daily.html" onclick="closeDrawer()">Daily</a>
+    <a href="guru.html" onclick="closeDrawer()">AI Guru</a>
+  </div>
+
+  <div class="page">
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="index.html">
+          <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+            <g opacity=".6">
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+            </g>
+            <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+            <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          </svg>
+          <span data-i18n="site_title">Jyotish AI</span>
+        </a>
+                <ul class="nav-links">
+          <li><a href="index.html"><span data-i18n="nav_home">Home</span></a></li>
+          <li><a href="palm.html"><span data-i18n="nav_palm">Palm Reading</span></a></li>
+          <li><a href="kili.html"><span data-i18n="nav_kili">Kili Josyam</span></a></li>
+          <li><a href="horoscope.html"><span data-i18n="nav_horo">Horoscope</span></a></li>
+          <li><a href="daily.html"><span data-i18n="nav_daily">Daily Dashboard</span></a></li>
+          <li><a href="guru.html"><span data-i18n="nav_guru">AI Guru</span></a></li>
+        </ul>
+        <button class="nav-cta" id="themeToggler" style="margin-right:10px;" aria-label="Toggle Theme">☾ / ☀</button>
+        <button class="nav-cta" id="langToggler" style="margin-right:10px;">മലയാളം</button>
+        <button class="nav-cta" onclick="window.location.href='palm.html'" data-i18n="nav_cta">✦ Begin Journey</button>
+        <button class="nav-burger" id="burgerBtn" onclick="openDrawer()" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="almanac-wrapper">
+      <div class="almanac">
+        <header>
+          <p class="eyebrow">Astra Almanac</p>
+          <h1 data-i18n="horo_title">Today's reading</h1>
+          <p class="date-line" id="dateLine">—</p>
+          
+          <div class="timeframe-selector" style="margin-top:20px;">
+            <button class="tf-btn active" data-tf="daily" data-i18n="tab_daily">Daily</button>
+            <button class="tf-btn" data-tf="weekly" data-i18n="tab_weekly">Weekly</button>
+            <button class="tf-btn" data-tf="monthly" data-i18n="tab_monthly">Monthly</button>
+          </div>
+        </header>
+
+
+
+        <div class="wheel-stage" id="wheelStage">
+          <svg class="wheel" id="wheel" viewBox="0 0 640 640" role="img" aria-label="Zodiac wheel, select a sign to view its reading"></svg>
+          <p class="caption" id="caption">Select your sign</p>
+        </div>
+        
+        <div id="loading-reading" style="display: none; text-align: center; margin-top: 40px;">
+           <p style="font-family: var(--font-display); font-size: 24px; font-style: italic; color: var(--gold-deep);">Aligning the stars...</p>
+        </div>
+
+        <section class="reading" id="reading">
+          <div class="reading-head">
+            <h2 id="signName">—</h2>
+            <span class="dates" id="signDates">—</span>
+          </div>
+          
+          <p class="lede" id="signReading">—</p>
+          <p class="lede" id="signLove" style="font-size: 16px; margin-top: -15px; color: var(--ink-soft);"></p>
+          <p class="lede" id="signCareer" style="font-size: 16px; margin-top: -15px; color: var(--ink-soft);"></p>
+          <p class="lede" id="signHealth" style="font-size: 16px; margin-top: -15px; color: var(--ink-soft);"></p>
+          
+          <dl class="ledger">
+            <div id="ageRow" style="display: none;"><dt data-i18n="horo_age">Age</dt><dd id="signAge">—</dd></div>
+            <div><dt data-i18n="horo_element">Element</dt><dd id="signElement">—</dd></div>
+            <div><dt data-i18n="horo_planet">Ruling planet</dt><dd id="signPlanet">—</dd></div>
+            <div><dt data-i18n="lucky_num">Lucky number</dt><dd id="signNumber">—</dd></div>
+            <div><dt data-i18n="lucky_color">Lucky hue</dt><dd id="signColor"><span class="swatch" id="signSwatch"></span><span id="signColorName">—</span></dd></div>
+          </dl>
+          
+          <div class="remedy-box" id="remedyBox" style="display: none;">
+            <dt>Vedic Remedy</dt>
+            <dd id="signRemedy">—</dd>
+          </div>
+        </section>
+
+        <footer>Drawn fresh each day · based on your sun sign</footer>
+      </div>
+    </div>
+    
+  </div> <!-- /.page -->
+
+  <!-- Alert Modal -->
+  <div id="confirmModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <h3 data-i18n="palm_mismatch_title">✦ Alert ✦</h3>
+      <p id="modalMsg"></p>
+      <div class="modal-actions">
+        <button class="modal-btn proceed" onclick="document.getElementById('confirmModal').style.display='none'">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js?v=2"></script>
+  <script src="js/profiles.js"></script>
+  <script src="js/script.js?v=2"></script>
+  <script src="js/horoscope.js?v=2"></script>
+</body>
+</html>

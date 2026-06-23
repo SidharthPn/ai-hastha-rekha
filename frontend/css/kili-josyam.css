@@ -1,0 +1,466 @@
+:root {
+  --kili-bg: #0b0f19;
+  --kili-gold: #d4af37;
+  --kili-gold-dim: rgba(212, 175, 55, 0.5);
+  --kili-text: #e2e8f0;
+  --kili-card: #000000;
+  --kili-glow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+:root[data-theme="light"] {
+  --kili-bg: #F4EEE1;
+  --kili-card: #E7DEC9;
+  --kili-text: #2B2A3D;
+  --kili-gold: #C7973E;
+  --kili-gold-dim: rgba(199, 151, 62, 0.5);
+  --kili-glow: 0 0 20px rgba(199, 151, 62, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--kili-bg);
+  color: var(--kili-text);
+  font-family: 'Playfair Display', serif;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Background image */
+.bg-temple {
+  position: fixed;
+  inset: 0;
+  background: url('../assets/images/kerala_temple_background_1780943257926.png') center/cover no-repeat;
+  opacity: 0.15;
+  z-index: -1;
+}
+
+header {
+  text-align: center;
+  padding: 30px 10px;
+  position: relative;
+  z-index: 10;
+}
+
+header h1 {
+  color: var(--kili-gold);
+  font-size: 2.8rem;
+  text-shadow: var(--kili-glow);
+  margin-bottom: 10px;
+}
+
+header p {
+  color: #a0aec0;
+  font-family: 'Inter', sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* Form inputs */
+.input-group {
+  margin: 30px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.input-group label {
+  color: var(--kili-gold);
+  font-size: 1.2rem;
+}
+
+.input-group input[type="date"] {
+  background: var(--kili-card);
+  border: 1px solid var(--kili-gold-dim);
+  color: var(--kili-text);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+.btn-mystic {
+  background: transparent;
+  border: 2px solid var(--kili-gold);
+  color: var(--kili-gold);
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Playfair Display', serif;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.btn-mystic:hover {
+  background: var(--kili-gold);
+  color: var(--kili-bg);
+  box-shadow: var(--kili-glow);
+}
+
+/* Cage / Parrot Display */
+.mystic-stage {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  /* Reduced height to ensure it fits with cards */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+#cage-display {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#door-display {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#cage-img {
+  width: 380px;
+  /* Made bigger */
+  transition: opacity 0.5s;
+}
+
+#door-img {
+  width: 380px;
+  /* Made bigger */
+  transition: opacity 0.5s;
+}
+
+#bird-area {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 450px;
+  z-index: 5;
+}
+
+/* Larger, mobile-friendly 3D bird */
+#bird-img {
+  width: 250px;
+  animation: floatBird 4s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(212, 175, 55, 0.5));
+}
+
+@keyframes floatBird {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    filter: drop-shadow(0 0 10px #ffdf80);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 30px #d4af37);
+  }
+}
+
+/* Cards area */
+.cards-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 300px;
+  /* Space for the arc */
+  margin-top: -50px;
+}
+
+.deity-card {
+  position: absolute;
+  width: 60px;
+  height: 90px;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center bottom;
+  opacity: 0;
+}
+
+/* Start state */
+.deity-card.appear {
+  opacity: 1;
+}
+
+.deity-card.glow {
+  filter: drop-shadow(0 0 8px var(--kili-gold-dim));
+}
+
+.deity-card.dimmed {
+  opacity: 0.2;
+  filter: grayscale(100%);
+}
+
+.deity-card.selected {
+  transform: translateY(-50px) scale(1.2) !important;
+  z-index: 50;
+  filter: drop-shadow(var(--kili-glow));
+}
+
+.deity-card.center-stage {
+  left: 50% !important;
+  bottom: 100px !important;
+  transform: translateX(-50%) scale(2.5) !important;
+  z-index: 100;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+}
+
+.deity-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 5px;
+  border: 1px solid var(--kili-gold-dim);
+}
+
+.card-back {
+  background: url('../assets/images/card.png') center/cover;
+}
+
+.card-front {
+  background: var(--kili-card);
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5px;
+}
+
+/* Result Screen */
+.reading-container {
+  max-width: 700px;
+  width: 100%;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--kili-gold-dim);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#result-img {
+  width: 180px;
+  border-radius: 10px;
+  box-shadow: var(--kili-glow);
+  margin-bottom: 20px;
+}
+
+#result-deity {
+  color: var(--kili-gold);
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+#result-theme {
+  color: #a0aec0;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+}
+
+.reading-content {
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.reading-content h3 {
+  color: var(--kili-gold);
+  font-family: 'Playfair Display', serif;
+  margin: 20px 0 10px;
+  border-bottom: 1px solid var(--kili-gold-dim);
+  padding-bottom: 5px;
+}
+
+.reading-content p {
+  margin-bottom: 15px;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 40px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(212, 175, 55, 0.2);
+  border-top-color: var(--kili-gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Particles */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--kili-gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+  box-shadow: var(--kili-glow);
+}
+
+@keyframes particleExplode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2.2rem;
+  }
+
+  .mystic-stage {
+    height: 300px;
+  }
+
+  #cage-img,
+  #door-img {
+    width: 250px;
+  }
+
+  #bird-area {
+    height: 300px;
+  }
+
+  .cards-wrapper {
+    height: 200px;
+    margin-top: -20px;
+  }
+
+  .deity-card {
+    width: 45px;
+    height: 70px;
+  }
+
+  .deity-card.center-stage {
+    transform: translateX(-50%) scale(2) !important;
+    bottom: 50px !important;
+  }
+
+  .input-group input[type="date"] {
+    width: 90%;
+  }
+}
+
+.rarity-banner {
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.result-icon {
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+@keyframes mythicGlow {
+  0% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.5), 0 0 40px rgba(155, 89, 182, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(155, 89, 182, 1), 0 0 80px rgba(155, 89, 182, 0.8), 0 0 100px rgba(241, 196, 15, 0.5); transform: scale(1.03) translateY(-10px); }
+  100% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.5), 0 0 40px rgba(155, 89, 182, 0.3); transform: scale(1); }
+}
+
+.mythic-card-animation {
+  animation: mythicGlow 2.5s infinite ease-in-out !important;
+  border: 2px solid #9b59b6 !important;
+}
+

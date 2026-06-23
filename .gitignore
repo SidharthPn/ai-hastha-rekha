@@ -1,20 +1,28 @@
-# Environments
+# Environment variables and API keys
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+.env.local
+.env.*
 
-# Python
+# Python Cache
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+*.pyc
+*.pyo
+*.pyd
 
-# IDEs
-.idea/
+# Temporary and local IDE files
+.gemini/
 .vscode/
-*.swp
-*.swo
+.idea/
+.vs/
+
+# Node
+node_modules/
+package-lock.json
+
+# Backend Cache
+backend/data/
+backend/cached_*/
+
+# OS generated files
+.DS_Store
+Thumbs.db

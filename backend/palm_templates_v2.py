@@ -582,3 +582,31 @@ Tone guidance (follow these exactly):
 Confidence Level: {s.get('confidence','medium').capitalize()}
 
 Rules: no bullet points, no clinical words, frame everything positively."""
+def build_advanced_palmistry_prompt(slots: dict, astro_data: dict, dominance: str, lang: str) -> str:
+    lang_instruction = "Malayalam (using Malayalam script)" if lang == 'ml' else "English"
+    return f'''You are an expert Vedic astrologer and master palmist.
+You are giving a reading to a user based on their scanned hand details and astrological data.
+Language required: {lang_instruction}.
+
+Hand Dominance: {dominance}
+Astrological Data:
+- Zodiac Sign: {astro_data.get('zodiac_sign', 'Unknown')}
+- Element: {astro_data.get('element', 'Unknown')}
+- Life Path Number: {astro_data.get('life_path_number', 'Unknown')}
+
+Physical Palm Features Detected:
+{slots}
+
+Based on these combined factors, provide a deep, mystical, and highly personalized palmistry reading.
+You MUST output ONLY a valid JSON object. Do not include markdown code blocks or any other text.
+The JSON must have exactly the following keys, and the values must be the reading text in {lang_instruction}. Do not include the age/zodiac/element keys in the JSON body, only the reading sections:
+{{
+  "personality": "...",
+  "strengths": "...",
+  "career": "...",
+  "relationships": "...",
+  "current_life_phase": "...",
+  "hidden_potential": "...",
+  "guidance": "..."
+}}
+'''

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="guru_title">AI Guru - Jyotish AI</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Noto+Sans+Malayalam:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:ital@0;1&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/profiles.css">
+  <style>
+    /* Guru specific styling additions that aren't in style.css yet */
+    .chat-window {
+      height: 400px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px;
+      border: 1px solid var(--gold-dark);
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .chat-msg {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .chat-msg.user-msg {
+      flex-direction: row-reverse;
+      align-self: flex-end;
+    }
+
+    .chat-avatar {
+      font-size: 1.5rem;
+      background: var(--gold-dark);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar.user {
+      background: var(--surface-l);
+    }
+
+    .chat-bubble {
+      background: var(--surface);
+      border: 1px solid var(--gold-dark);
+      padding: 12px 16px;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      max-width: 80%;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-m);
+      white-space: pre-wrap;
+    }
+
+    .chat-bubble.user-b {
+      background: var(--gold-dark);
+      color: var(--bg);
+      border-color: var(--gold);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--gold-dark);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 24px;
+      font-family: inherit;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .chat-send {
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 0 24px;
+      border-radius: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .chat-send:hover {
+      opacity: 0.9;
+    }
+
+    .chat-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- cosmos canvas -->
+  <canvas id="cosmosCanvas"></canvas>
+
+  <!-- mobile nav drawer -->
+  <div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Navigation menu">
+    <button class="nav-drawer-close" onclick="closeDrawer()" aria-label="Close menu">✕</button>
+    <a href="index.html" onclick="closeDrawer()"><span data-i18n="nav_home">Home</span></a>
+    <a href="palm.html" onclick="closeDrawer()">Palm Reading</a>
+    <a href="kili.html" onclick="closeDrawer()">Kili Josyam</a>
+    <a href="horoscope.html" onclick="closeDrawer()">Horoscope</a>
+    <a href="daily.html" onclick="closeDrawer()">Daily</a>
+    <a href="guru.html" onclick="closeDrawer()">AI Guru</a>
+  </div>
+
+  <div class="page">
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="index.html">
+          <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <circle cx="50" cy="50" r="47" stroke="#c9a84c" stroke-width="1" opacity=".5" />
+            <circle cx="50" cy="50" r="6" fill="#c9a84c" opacity=".8" />
+            <g opacity=".6">
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(45,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(90,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(135,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(180,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(225,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(270,50,50)" />
+              <ellipse cx="50" cy="30" rx="4" ry="10" fill="#c9a84c" transform="rotate(315,50,50)" />
+            </g>
+            <polygon points="50,18 68,65 32,65" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+            <polygon points="50,82 32,35 68,35" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity=".5" />
+          </svg>
+          <span data-i18n="site_title">Jyotish AI</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html"><span data-i18n="nav_home">Home</span></a></li>
+          <li><a href="palm.html"><span data-i18n="nav_palm">Palm Reading</span></a></li>
+          <li><a href="kili.html"><span data-i18n="nav_kili">Kili Josyam</span></a></li>
+          <li><a href="horoscope.html"><span data-i18n="nav_horo">Horoscope</span></a></li>
+          <li><a href="daily.html"><span data-i18n="nav_daily">Daily Dashboard</span></a></li>
+          <li><a href="guru.html"><span data-i18n="nav_guru">AI Guru</span></a></li>
+        </ul>
+        <button class="nav-cta" id="themeToggler" style="margin-right:10px;" aria-label="Toggle Theme">☾ / ☀</button>
+        <button class="nav-cta" id="langToggler" style="margin-right:10px;">മലയാളം</button>
+        <button class="nav-cta" onclick="window.location.href='palm.html'" data-i18n="nav_cta">✦ Begin Journey</button>
+        <button class="nav-burger" id="burgerBtn" onclick="openDrawer()" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── AI GURU ── -->
+    <section class="section" id="guru" style="padding-top: 40px;">
+      <p class="section-eyebrow" data-i18n="guru_eyebrow">Stage 5 · AI Guidance</p>
+      <h2 class="section-title" data-i18n="guru_title">Your AI Guru</h2>
+      <p class="section-sub" data-i18n="guru_sub" id="guruStatusText">A spiritual mentor who listens, reflects, and
+        guides — never predicts</p>
+
+      <div class="guru-wrap" style="max-width: 800px; margin: 0 auto;">
+        <div class="guru-card">
+          <div class="guru-avatar" style="font-size: 3rem; text-align: center; margin-bottom: 10px;"></div>
+          <h3 data-i18n="speak_guru" style="text-align: center;">Speak with Guruji</h3>
+
+          <div id="profileWarning"
+            style="display:none; text-align:center; padding: 10px; background: rgba(255,0,0,0.1); border: 1px solid red; border-radius: 8px; margin-bottom: 15px;">
+            Please create and select a profile in the Horoscope section first so Guruji knows your astrological chart.
+          </div>
+
+          <div class="chat-window" id="chatWindow">
+            <div class="chat-msg">
+              <div class="chat-avatar guru"></div>
+              <div class="chat-bubble">Namaskaram. I am here, as the light is always here — waiting for you to notice
+                it. What question does your heart carry today?</div>
+            </div>
+          </div>
+
+          <form id="chatForm" class="chat-row" onsubmit="event.preventDefault(); submitGuruChat();">
+            <input class="chat-input" type="text" id="guruInput" placeholder="Ask Guruji anything…" autocomplete="off"
+              required>
+            <button class="chat-send" type="submit" id="guruSendBtn" data-i18n="ask_btn">Ask →</button>
+          </form>
+
+          <div class="quick-qs" id="quickQsContainer">
+            <!-- Dynamically populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="foot-logo" data-i18n="site_title">Jyotish AI</div>
+      <ul class="foot-links">
+        <li><a href="palm.html">Palm Reading</a></li>
+        <li><a href="kili.html">Kili Josyam</a></li>
+        <li><a href="horoscope.html">Horoscope</a></li>
+        <li><a href="daily.html">Daily Dashboard</a></li>
+        <li><a href="guru.html">AI Guru</a></li>
+      </ul>
+      <p class="foot-copy">
+        <span data-i18n="foot_copy">May wisdom light your path<br>© 2026 Jyotish AI · For spiritual guidance only · Not
+          a substitute for professional advice</span>
+      </p>
+    </footer>
+
+  </div><!-- /.page -->
+
+  <!-- Alert Modal (Reused from profiles) -->
+  <div id="confirmModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <h3 data-i18n="palm_mismatch_title">✦ Alert ✦</h3>
+      <p id="modalMsg"></p>
+      <div class="modal-actions">
+        <button class="modal-btn proceed"
+          onclick="document.getElementById('confirmModal').style.display='none'">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js?v=2"></script>
+  <script src="js/profiles.js"></script>
+  <script src="js/script.js?v=2"></script>
+  <script src="js/guru.js?v=4"></script>
+</body>
+
+</html>
