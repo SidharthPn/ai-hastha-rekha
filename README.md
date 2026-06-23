@@ -14,7 +14,9 @@ A comprehensive modern web application that combines traditional Vedic astrology
 
 - **Frontend**: Vanilla HTML, CSS, JavaScript
 - **Backend**: Python, FastAPI
-- **AI Integration**: Google Gemini AI (via `google-genai` SDK)
+- **AI Integration**: A Dual-Model AI Engine
+  - **Groq API**: Acts as the primary blazing-fast text engine (using Llama models) powering the Daily Dashboards, AI Guru chat, and Kili Josyam readings.
+  - **Google Gemini**: Acts as the Vision AI model for analyzing palm images and mapping the structural lines of the hand.
 
 ## Setup & Run
 
@@ -25,9 +27,10 @@ cd backend
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in the `backend` directory and add your Gemini API Key:
+Create a `.env` file in the `backend` directory and add your API Keys:
 ```
-GEMINI_API_KEY=your_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
 ```
 
 Start the backend server:
