@@ -34,5 +34,6 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    # Make sure to run on port 8000 to match the frontend expectations
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Use PORT from environment variable if available (required for Render)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
