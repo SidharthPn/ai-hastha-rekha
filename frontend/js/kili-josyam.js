@@ -265,47 +265,47 @@ function startAnimationSequence(dailyCardOverride = null) {
   cageDisplay.style.display = 'none';
   doorDisplay.style.display = 'flex';
 
-  // Wait 2 seconds for glowing door, then show 3D parrot
+  // Wait 1 second for glowing door, then show 3D parrot
   setTimeout(() => {
     doorDisplay.style.display = 'none';
     birdArea.style.display = 'block';
     initThreeJS();
-  }, 2000);
+  }, 1000);
 
-  // Wait 3 seconds, then show cards
-  setTimeout(() => cards.forEach(c => c.classList.add('appear')), 3000);
+  // Wait 1.5 seconds, then show cards
+  setTimeout(() => cards.forEach(c => c.classList.add('appear')), 1500);
 
   // Cards softly glow
-  setTimeout(() => cards.forEach(c => c.classList.add('glow')), 4000);
+  setTimeout(() => cards.forEach(c => c.classList.add('glow')), 2000);
 
   // Selected card rises
-  setTimeout(() => targetCard.classList.add('selected'), 5500);
+  setTimeout(() => targetCard.classList.add('selected'), 2500);
 
   // All other cards dim
   setTimeout(() => {
     cards.forEach(c => {
       if (c.id !== `card-${selectedCircleIndex}`) c.classList.add('dimmed');
     });
-  }, 6000);
+  }, 2800);
 
   // Golden particle effect and Temple bell sound
   setTimeout(() => {
     createParticles(targetCard);
     try { audioBell.play(); } catch (e) { console.log("Audio blocked"); }
-  }, 7000);
+  }, 3200);
 
   // Card moves to center
-  setTimeout(() => targetCard.classList.add('center-stage'), 8500);
+  setTimeout(() => targetCard.classList.add('center-stage'), 4000);
 
   // 3D Flip animation
-  setTimeout(() => targetCard.classList.add('flipped'), 9500);
+  setTimeout(() => targetCard.classList.add('flipped'), 4500);
 
   // Reveal reading screen
   setTimeout(() => {
     switchScreen('screen2', 'screen3');
     displayResult();
     fetchReading();
-  }, 11500);
+  }, 5500);
 }
 
 function createParticles(element) {

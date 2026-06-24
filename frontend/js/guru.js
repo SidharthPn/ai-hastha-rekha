@@ -159,7 +159,9 @@
             };
             
             // Use window.location.hostname so it works on mobile devices testing on local network
-            const API_URL = `http://${window.location.hostname}:8000`;
+            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+              ? 'http://localhost:8000'
+              : 'https://ai-hastha-rekha.onrender.com';
             
             const response = await fetch(`${API_URL}/guru/chat`, {
                 method: 'POST',

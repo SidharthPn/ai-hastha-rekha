@@ -189,7 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
     readingEl.classList.add('fade');
 
     try {
-      const res = await fetch(`http://localhost:8000/horoscope/${tf}?dob=${dob}&lang=${lang}&relation=${profile.relation}&name=${profile.name}`);
+      const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8000'
+        : 'https://ai-hastha-rekha.onrender.com';
+      const res = await fetch(`${API_URL}/horoscope/${tf}?dob=${dob}&lang=${lang}&relation=${profile.relation}&name=${profile.name}`);
       if(!res.ok) throw new Error("Failed to fetch horoscope");
       const data = await res.json();
       
