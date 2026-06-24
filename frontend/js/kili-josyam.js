@@ -94,7 +94,20 @@ function initThreeJS() {
   clock = new THREE.Clock();
 
   const loader = new THREE.GLTFLoader();
-  loader.load('assets/images/love_birds_parrot/scene.gltf', (gltf) => {
+  
+  // Attach the MeshoptDecoder so we can read the ultra-compressed 10MB file
+  if (typeof MeshoptDecoder !== 'undefined') {
+    MeshoptDecoder.ready.then(() => {
+      loader.setMeshoptDecoder(MeshoptDecoder);
+      loadParrotModel(loader);
+    });
+  } else {
+    console.warn("MeshoptDecoder not loaded, 3D model might fail.");
+    loadParrotModel(loader);
+  }
+
+  function loadParrotModel(loader) {
+    loader.load('assets/images/parrot.glb', (gltf) => {
     parrot = gltf.scene;
 
     // Remove any shiny materials or emissive glows to keep it natural
@@ -135,6 +148,7 @@ function initThreeJS() {
   }, undefined, (error) => {
     console.error("Error loading parrot:", error);
   });
+  }
 
   window.addEventListener('resize', () => {
     if (!camera || !renderer) return;
