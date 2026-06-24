@@ -94,7 +94,7 @@ function initThreeJS() {
   clock = new THREE.Clock();
 
   const loader = new THREE.GLTFLoader();
-  loader.load('assets/images/parrot.glb', (gltf) => {
+  loader.load('assets/images/love_birds_parrot/scene.gltf', (gltf) => {
     parrot = gltf.scene;
 
     // Remove any shiny materials or emissive glows to keep it natural

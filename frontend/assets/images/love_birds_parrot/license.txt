@@ -1,0 +1,11 @@
+Model Information:
+* title:	Love Birds Parrot
+* source:	https://sketchfab.com/3d-models/love-birds-parrot-e31e1c72cff140158b99172285b40056
+* author:	Nyilonelycompany (https://sketchfab.com/Nyilonelycompany)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Love Birds Parrot" (https://sketchfab.com/3d-models/love-birds-parrot-e31e1c72cff140158b99172285b40056) by Nyilonelycompany (https://sketchfab.com/Nyilonelycompany) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
