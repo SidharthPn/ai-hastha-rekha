@@ -71,112 +71,290 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+function createFeatherTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 512, 512);
+  
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 500; i++) {
+    let x = Math.random() * 512;
+    let y = Math.random() * 512;
+    let len = 15 + Math.random() * 25;
+    let angle = Math.sin(y * 0.05) * 0.2 + Math.PI / 2;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+    ctx.stroke();
+  }
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 4);
+  return texture;
+}
+
 function initThreeJS() {
   const container = document.getElementById('bird-area');
   if (container.children.length > 0) return; // already initialized
 
   scene = new THREE.Scene();
+  // Background and fog removed as per request to preserve existing transparent integration
 
-  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-  camera.position.set(0, 0, 10); // Moved camera back to prevent clipping
+  camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(0, 0.6, 6.5); 
+  camera.lookAt(0, -0.2, 0);       
 
-  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer = new THREE.WebGLRenderer({alpha: true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
   container.appendChild(renderer.domElement);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
-  scene.add(ambientLight);
+  // LIGHTS
+  scene.add(new THREE.AmbientLight(0xfff5ea, 0.6));
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-  directionalLight.position.set(5, 10, 7);
-  scene.add(directionalLight);
-  clock = new THREE.Clock();
+  const sun = new THREE.DirectionalLight(0xfffdf6, 2.5);
+  sun.position.set(5, 6, 4);
+  sun.castShadow = true;
+  scene.add(sun);
 
-  const loader = new THREE.GLTFLoader();
+  const rim = new THREE.PointLight(0xffaa44, 2.5, 15);
+  rim.position.set(-3, 3, -3);
+  scene.add(rim);
+
+  const fill = new THREE.PointLight(0x88bbff, 0.8, 12);
+  fill.position.set(3, -2, 3);
+  scene.add(fill);
+
+  // PROCEDURAL FEATHER FINISH TEXTURE
+  const featherMap = createFeatherTexture();
+
+  // MATERIALS
+  function cmat(hex, r=0.6, m=0.05, dynamicFeather=false){
+    return new THREE.MeshStandardMaterial({
+      color: hex, 
+      roughness: r, 
+      metalness: m,
+      map: dynamicFeather ? featherMap : null
+    });
+  }
+
+  const bodyMat   = cmat(0x00b050, 0.75, 0.02, true); 
+  const headMat   = cmat(0xffcc00, 0.7, 0.02, true);  
+  const bellyMat  = cmat(0xff9900, 0.7, 0.02, true);   
+  const wingMat   = cmat(0x0080ff, 0.65, 0.02, true);  
+  const beakMat   = cmat(0xff2222, 0.35, 0.05); 
+  const eyeMat    = cmat(0x0c090a, 0.1, 0.0);  
+  const eyeWMat   = cmat(0xfffbf2, 0.5, 0.0);  
+  const clawMat   = cmat(0x9fa4a6, 0.6, 0.0);
+
+  function mesh(geo, mat){
+    const m = new THREE.Mesh(geo, mat);
+    m.castShadow = true; 
+    m.receiveShadow = true;
+    return m;
+  }
+
+  function sph(rx, ry, rz){ 
+    return new THREE.SphereGeometry(1, 32, 24).applyMatrix4(new THREE.Matrix4().makeScale(rx, ry, rz)); 
+  }
+
+  // PARROT ASSEMBLY
+  parrotRoot = new THREE.Group();
+  parrotRoot.position.set(0, -0.3, 0); 
   
-  // Attach the MeshoptDecoder so we can read the ultra-compressed 10MB file
-  if (typeof MeshoptDecoder !== 'undefined') {
-    MeshoptDecoder.ready.then(() => {
-      loader.setMeshoptDecoder(MeshoptDecoder);
-      loadParrotModel(loader);
-    });
-  } else {
-    console.warn("MeshoptDecoder not loaded, 3D model might fail.");
-    loadParrotModel(loader);
+  // Scale down slightly to fit the card area optimally
+  parrotRoot.scale.set(1.5, 1.5, 1.5);
+  parrotRoot.position.y -= 1.0;
+  
+  scene.add(parrotRoot);
+
+  const body = mesh(sph(0.78, 1.05, 0.70), bodyMat);
+  body.position.y = 0.2;
+  parrotRoot.add(body);
+
+  const belly = mesh(sph(0.64, 0.72, 0.48), bellyMat);
+  belly.position.set(0, 0.05, 0.26);
+  parrotRoot.add(belly);
+
+  headGroup = new THREE.Group();
+  headGroup.position.set(0, 1.15, 0.1);
+  parrotRoot.add(headGroup);
+
+  const head = mesh(sph(0.58, 0.58, 0.54), headMat);
+  headGroup.add(head);
+
+  function makeCuteEye(side){
+    const eg = new THREE.Group();
+    const eyeWhite = mesh(new THREE.SphereGeometry(0.09, 16, 12), eyeWMat);
+    const pupil = mesh(new THREE.SphereGeometry(0.062, 16, 12), eyeMat);
+    pupil.position.z = 0.042;
+    pupil.scale.set(1, 1.05, 1); 
+    const sheen1 = mesh(new THREE.SphereGeometry(0.02, 8, 8), cmat(0xffffff, 0.05, 0.9));
+    sheen1.position.set(side * 0.018, 0.022, 0.09);
+    const sheen2 = mesh(new THREE.SphereGeometry(0.01, 8, 8), cmat(0xffffff, 0.05, 0.9));
+    sheen2.position.set(side * -0.022, -0.015, 0.09);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.094, 0.008, 8, 24), cmat(0xdad3c1, 0.7));
+    eg.add(eyeWhite, pupil, sheen1, sheen2, ring);
+    eg.position.set(side * 0.33, 0.14, 0.34);
+    eg.rotation.y = side * 0.45; 
+    return eg;
   }
+  headGroup.add(makeCuteEye(1));
+  headGroup.add(makeCuteEye(-1));
 
-  function loadParrotModel(loader) {
-    loader.load('assets/images/parrot.glb', (gltf) => {
-    parrot = gltf.scene;
+  const upperBeakGeo = new THREE.CylinderGeometry(0, 0.14, 0.38, 16);
+  upperBeakGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.19, 0)); 
+  const upperBeakMesh = mesh(upperBeakGeo, beakMat);
+  upperBeakMesh.position.set(0, 0.02, 0.38);
+  upperBeakMesh.rotation.x = Math.PI / 2 + 0.35; 
+  headGroup.add(upperBeakMesh);
 
-    // Remove any shiny materials or emissive glows to keep it natural
-    parrot.traverse((child) => {
-      if (child.isMesh && child.material) {
-        child.material.roughness = 1.0; // fully matte
-        child.material.metalness = 0.0; // no metallic reflections
-        if (child.material.emissive) {
-          child.material.emissive.setHex(0x000000); // disable glowing parts
-        }
-      }
-    });
+  lowerBeakGroup = new THREE.Group();
+  lowerBeakGroup.position.set(0, -0.08, 0.38); 
+  headGroup.add(lowerBeakGroup);
 
-    // Calculate initial bounding box for maxDim
-    const box = new THREE.Box3().setFromObject(parrot);
-    const maxDim = Math.max(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
-    window.parrotMaxDim = maxDim; // save for resize event
-    const targetSize = window.innerWidth <= 600 ? 8.0 : 12.0; // doubled since camera is twice as far
-    parrot.scale.setScalar(targetSize / maxDim);
+  const lowerBeakGeo = new THREE.CylinderGeometry(0, 0.11, 0.24, 16);
+  lowerBeakGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.12, 0)); 
+  lowerBeakGeo.applyMatrix4(new THREE.Matrix4().makeScale(1, 1, 0.6)); 
+  const lowerBeakMesh = mesh(lowerBeakGeo, beakMat);
+  lowerBeakMesh.rotation.x = Math.PI / 2 - 0.15; 
+  lowerBeakGroup.add(lowerBeakMesh);
 
-    // Re-center AFTER scaling
-    const scaledBox = new THREE.Box3().setFromObject(parrot);
-    const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-    parrot.position.x -= scaledCenter.x;
-    parrot.position.y -= scaledCenter.y;
-    parrot.position.z -= scaledCenter.z;
-
-    parrot.position.y -= 1.0; // move down slightly for visual balance
-
-    scene.add(parrot);
-
-    if (gltf.animations && gltf.animations.length > 0) {
-      mixer = new THREE.AnimationMixer(parrot);
-      gltf.animations.forEach((clip) => {
-        mixer.clipAction(clip).play();
-      });
-    }
-  }, undefined, (error) => {
-    console.error("Error loading parrot:", error);
-  });
+  function makeWing(side){
+    const wg = new THREE.Group();
+    wg.position.set(side * 0.74, 0.2, 0);
+    const wingBase = mesh(sph(0.18, 0.65, 0.38), wingMat);
+    wingBase.rotation.z = side * 0.15;
+    wg.add(wingBase);
+    return wg;
   }
+  wingL = makeWing(1);
+  wingR = makeWing(-1);
+  parrotRoot.add(wingL, wingR);
 
+  const tailFeathers = new THREE.Group();
+  tailFeathers.position.set(0, -0.65, -0.45);
+  tailFeathers.rotation.x = 0.45;
+  parrotRoot.add(tailFeathers);
+
+  const mainFeather = mesh(sph(0.14, 0.7, 0.05), wingMat);
+  mainFeather.position.y = -0.4;
+  tailFeathers.add(mainFeather);
+
+  function makeFoot(side){
+    const fg = new THREE.Group();
+    const leg = mesh(new THREE.CylinderGeometry(0.045, 0.04, 0.3, 8), clawMat);
+    leg.position.y = -0.15;
+    fg.add(leg);
+    [0.6, -0.6, Math.PI].forEach(angle => {
+      const claw = mesh(new THREE.CylinderGeometry(0.02, 0.012, 0.2, 6), clawMat);
+      claw.rotation.x = Math.PI/2;
+      claw.rotation.y = angle;
+      claw.position.set(Math.sin(angle)*0.08, -0.3, Math.cos(angle)*0.08);
+      fg.add(claw);
+    });
+    fg.position.set(side * 0.22, -0.62, 0.05);
+    return fg;
+  }
+  parrotRoot.add(makeFoot(1), makeFoot(-1));
+
+  clock = new THREE.Clock();
+  
   window.addEventListener('resize', () => {
     if (!camera || !renderer) return;
     camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(container.clientWidth, container.clientHeight);
+  });
 
-    // dynamically adjust scale if window crosses breakpoint
-    if (parrot && window.parrotMaxDim) {
-      const targetSize = window.innerWidth <= 600 ? 8.0 : 12.0;
-      parrot.scale.setScalar(targetSize / window.parrotMaxDim);
-
-      // Re-center after resize scaling
-      const scaledBox = new THREE.Box3().setFromObject(parrot);
-      const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-      parrot.position.x -= scaledCenter.x;
-      parrot.position.y -= scaledCenter.y;
-      parrot.position.z -= scaledCenter.z;
-      parrot.position.y -= 1.0;
+  window.addEventListener('mousemove', (e) => {
+    if(animState === 0 || animState === 3) {
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, nx * 0.4, 0.05);
+      camera.position.y = THREE.MathUtils.lerp(camera.position.y, 0.6 - (ny * 0.25), 0.05);
+      camera.lookAt(0, -0.2, 0); 
     }
   });
 
   animateThreeJS();
 }
 
+function easeInOutQuad(x) {
+  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+}
+
 function animateThreeJS() {
   requestAnimationFrame(animateThreeJS);
-  if (mixer) mixer.update(clock.getDelta());
+  const delta = clock.getDelta();
+  t += delta;
+  stateTimer += delta;
+
+  if (stateTimer >= stateDurations[animState]) {
+    stateTimer = 0;
+    animState = (animState + 1) % stateDurations.length;
+  }
+
+  const progress = Math.min(stateTimer / stateDurations[animState], 1);
+  const ep = easeInOutQuad(progress);
+
+  let wingTwitch = Math.sin(t * 12) * 0.02;
+  wingL.rotation.z = 0.15 + wingTwitch;
+  wingR.rotation.z = -0.15 - wingTwitch;
+
+  switch(animState) {
+    case 0: // INSPECT
+      parrotRoot.position.set(0, -1.3 + Math.sin(t * 2) * 0.015, 0);
+      parrotRoot.rotation.set(0, Math.sin(t * 1.5) * 0.03, 0);
+      headGroup.rotation.x = ep * 0.45;
+      lowerBeakGroup.rotation.x = 0; 
+      break;
+
+    case 1: // DIP DOWN TO GRAB
+      let dip = ep;
+      parrotRoot.position.set(0, -1.3 - (dip * 0.28), dip * 0.25);
+      parrotRoot.rotation.x = dip * 0.5;
+      headGroup.rotation.x = 0.45 + (dip * 0.2);
+      lowerBeakGroup.rotation.x = Math.sin(dip * Math.PI) * 0.35; 
+      break;
+
+    case 2: // LIFTING UP
+      let lift = ep;
+      parrotRoot.position.set(0, -0.28 * (1 - lift) - 1.3, 0.25 * (1 - lift));
+      parrotRoot.rotation.x = 0.5 * (1 - lift);
+      headGroup.rotation.x = (0.45 + 0.2) * (1 - lift) - (lift * 0.15);
+      lowerBeakGroup.rotation.x = 0.35 * (1 - lift) - 0.05; 
+      break;
+
+    case 3: // PROUD PRESENTATION
+      parrotRoot.position.set(0, -1.3 + Math.sin(t * 2.5) * 0.02, 0);
+      parrotRoot.rotation.set(Math.sin(t * 1.2) * 0.02, 0.25 * Math.sin(t * 0.8), 0);
+      headGroup.rotation.set(-0.15 + Math.sin(t * 3.5) * 0.04, Math.sin(t * 2) * 0.05, 0);
+      lowerBeakGroup.rotation.x = -0.05; 
+      break;
+
+    case 4: // RESET BACK TO IDLE
+      let resetFactor = ep;
+      headGroup.rotation.y *= (1 - resetFactor);
+      headGroup.rotation.x = -0.15 + (resetFactor * 0.6);
+      if(resetFactor > 0.7) {
+        lowerBeakGroup.rotation.x = (1 - resetFactor) * -0.1; 
+      }
+      break;
+  }
+
   renderer.render(scene, camera);
 }
 
