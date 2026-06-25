@@ -50,12 +50,11 @@ def call_llm(prompt, system, max_tokens=500, temp=0.7, json_mode=False):
             except Exception as e:
                 err = str(e)
                 if "rate_limit" in err.lower():
-                    m = re.search(r'try again in (\d+)m(\d+)', err)
-                    wait = (int(m.group(1))*60 + int(m.group(2))) if m else 10
-                    print(f"Rate limit — waiting {min(wait,30)}s")
-                    time.sleep(min(wait, 30))
+                    print(f"Groq Rate limit hit for {model}. Falling back immediately.")
+                    break # Skip trying other Groq models and fallback to Gemini
                 else:
                     print(f"Groq {model}: {e}")
+                    
     if not result and GOOGLE_API_KEY:
         try:
             m = genai.GenerativeModel('gemini-1.5-flash')
@@ -91,10 +90,8 @@ def stream_chat_llm(messages, max_tokens=1000, temp=0.7):
             except Exception as e:
                 err = str(e)
                 if "rate_limit" in err.lower():
-                    m = re.search(r'try again in (\d+)m(\d+)', err)
-                    wait = (int(m.group(1))*60 + int(m.group(2))) if m else 10
-                    print(f"Rate limit — waiting {min(wait,30)}s")
-                    time.sleep(min(wait, 30))
+                    print(f"Groq Rate limit hit for {model}. Falling back immediately.")
+                    break # Skip trying other Groq models and fallback to Gemini
                 else:
                     print(f"Groq {model} stream error: {e}")
 

@@ -6,6 +6,11 @@ let dobInput = "";
 
 // Three.js variables
 let scene, camera, renderer, parrot, mixer, clock;
+let parrotRoot, headGroup, lowerBeakGroup, wingL, wingR;
+let t = 0;
+let animState = 0;
+let stateTimer = 0;
+const stateDurations = [1.5, 0.8, 0.9, 3.0, 1.2];
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Fetch cards
@@ -108,33 +113,37 @@ function initThreeJS() {
   scene = new THREE.Scene();
   // Background and fog removed as per request to preserve existing transparent integration
 
-  camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera = new THREE.PerspectiveCamera(40, (container.clientWidth || window.innerWidth) / (container.clientHeight || 450), 0.1, 100);
   camera.position.set(0, 0.6, 6.5); 
   camera.lookAt(0, -0.2, 0);       
 
   renderer = new THREE.WebGLRenderer({alpha: true, antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 450);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
   container.appendChild(renderer.domElement);
+  
+  // ensure canvas gets proper layout
+  setTimeout(() => {
+    renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 450);
+  }, 100);
 
   // LIGHTS
   scene.add(new THREE.AmbientLight(0xfff5ea, 0.6));
-
   const sun = new THREE.DirectionalLight(0xfffdf6, 2.5);
   sun.position.set(5, 6, 4);
   sun.castShadow = true;
   scene.add(sun);
 
   const rim = new THREE.PointLight(0xffaa44, 2.5, 15);
-  rim.position.set(-3, 3, -3);
+  rim.position.set(-5, 5, -5);
   scene.add(rim);
 
-  const fill = new THREE.PointLight(0x88bbff, 0.8, 12);
-  fill.position.set(3, -2, 3);
+  const fill = new THREE.DirectionalLight(0xfff0dd, 0.8);
+  fill.position.set(-5, 0, 5);
   scene.add(fill);
 
   // PROCEDURAL FEATHER FINISH TEXTURE
@@ -166,8 +175,10 @@ function initThreeJS() {
     return m;
   }
 
-  function sph(rx, ry, rz){ 
-    return new THREE.SphereGeometry(1, 32, 24).applyMatrix4(new THREE.Matrix4().makeScale(rx, ry, rz)); 
+  function sph(rx, ry, rz){
+    const geo = new THREE.SphereGeometry(1, 32, 24);
+    geo.applyMatrix4(new THREE.Matrix4().makeScale(rx, ry, rz));
+    return geo;
   }
 
   // PARROT ASSEMBLY
@@ -274,9 +285,9 @@ function initThreeJS() {
   
   window.addEventListener('resize', () => {
     if (!camera || !renderer) return;
-    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.aspect = (container.clientWidth || window.innerWidth) / (container.clientHeight || 450);
     camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || 450);
   });
 
   window.addEventListener('mousemove', (e) => {
@@ -316,7 +327,7 @@ function animateThreeJS() {
 
   switch(animState) {
     case 0: // INSPECT
-      parrotRoot.position.set(0, -1.3 + Math.sin(t * 2) * 0.015, 0);
+      parrotRoot.position.set(0, -0.3 + Math.sin(t * 2) * 0.015, 0);
       parrotRoot.rotation.set(0, Math.sin(t * 1.5) * 0.03, 0);
       headGroup.rotation.x = ep * 0.45;
       lowerBeakGroup.rotation.x = 0; 
@@ -324,7 +335,7 @@ function animateThreeJS() {
 
     case 1: // DIP DOWN TO GRAB
       let dip = ep;
-      parrotRoot.position.set(0, -1.3 - (dip * 0.28), dip * 0.25);
+      parrotRoot.position.set(0, -0.3 - (dip * 1.6), dip * 0.25);
       parrotRoot.rotation.x = dip * 0.5;
       headGroup.rotation.x = 0.45 + (dip * 0.2);
       lowerBeakGroup.rotation.x = Math.sin(dip * Math.PI) * 0.35; 
@@ -332,14 +343,14 @@ function animateThreeJS() {
 
     case 2: // LIFTING UP
       let lift = ep;
-      parrotRoot.position.set(0, -0.28 * (1 - lift) - 1.3, 0.25 * (1 - lift));
+      parrotRoot.position.set(0, -1.9 + (lift * 1.6), 0.25 * (1 - lift));
       parrotRoot.rotation.x = 0.5 * (1 - lift);
       headGroup.rotation.x = (0.45 + 0.2) * (1 - lift) - (lift * 0.15);
       lowerBeakGroup.rotation.x = 0.35 * (1 - lift) - 0.05; 
       break;
 
     case 3: // PROUD PRESENTATION
-      parrotRoot.position.set(0, -1.3 + Math.sin(t * 2.5) * 0.02, 0);
+      parrotRoot.position.set(0, -0.3 + Math.sin(t * 2.5) * 0.02, 0);
       parrotRoot.rotation.set(Math.sin(t * 1.2) * 0.02, 0.25 * Math.sin(t * 0.8), 0);
       headGroup.rotation.set(-0.15 + Math.sin(t * 3.5) * 0.04, Math.sin(t * 2) * 0.05, 0);
       lowerBeakGroup.rotation.x = -0.05; 
