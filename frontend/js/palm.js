@@ -27,23 +27,10 @@ let pendingForm = null; // form prepared for the hand-mismatch confirmation flow
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-const cameraInput = document.getElementById('cameraInput');
 const analyzeBtn = document.getElementById('analyzeBtn');
 
-// ── MEDIA PICKER FIX ─────────────────────────────────────────────
-// The "Take Photo" / "Upload" buttons sit as transparent overlays on
-// top of <input type="file"> elements. The whole drop-zone ALSO has a
-// click handler that opens the gallery picker (fileInput). Without
-// stopping propagation, tapping either button bubbles up to the
-// drop-zone and triggers a SECOND, conflicting file-picker request —
-// which on mobile browsers (Android Chrome / iOS Safari) causes the
-// camera picker to be cancelled or replaced by the gallery picker.
-document.querySelectorAll('.upload-action-wrap').forEach(wrapper => {
-  wrapper.addEventListener('click', e => e.stopPropagation());
-});
-
 // Support clicking anywhere else on the zone to fall back to gallery
-dropZone.addEventListener('click', () => fileInput.click());
+// (Handled by the absolute positioned file input in HTML now)
 
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover') });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -52,7 +39,6 @@ dropZone.addEventListener('drop', e => {
   if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
 fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]) });
-cameraInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]) });
 
 function handleFile(file) {
   selectedFile = file;

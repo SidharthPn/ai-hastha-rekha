@@ -187,22 +187,12 @@
           <p class="drop-sub" style="margin-bottom:20px;" data-i18n="palm_drop_sub">Tap to capture or upload a photo of
             your palm</p>
 
+          <input type="file" id="fileInput" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; display: block;">
+          
           <div class="upload-actions">
-
-            <div class="upload-action-wrap">
-              <input type="file" id="cameraInput" accept="image/*" capture="environment">
-              <button type="button" class="upload-btn upload-btn-primary">
-                <span style="font-size:1.2rem;"></span> <span data-i18n="palm_take_photo">Take Photo</span>
-              </button>
-            </div>
-
-            <div class="upload-action-wrap">
-              <input type="file" id="fileInput" accept="image/*">
-              <button type="button" class="upload-btn upload-btn-secondary">
-                <span style="font-size:1.2rem;"></span> <span data-i18n="palm_upload">Upload</span>
-              </button>
-            </div>
-
+            <button type="button" class="upload-btn upload-btn-primary" style="pointer-events: none; width: auto; padding: 12px 32px;">
+              <span style="font-size:1.2rem;"></span> <span data-i18n="palm_upload">Choose Photo</span>
+            </button>
           </div>
         </div>
 
