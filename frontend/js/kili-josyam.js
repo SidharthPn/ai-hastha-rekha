@@ -64,6 +64,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       readingPromise = preloadReadingData();
       renderReadingFromPromise();
     }
+    const ttsLabel = document.getElementById('ttsLabel');
+    if (ttsLabel) {
+      const lang = localStorage.getItem('astro_lang_preference') || 'en';
+      ttsLabel.textContent = lang === 'en' ? '🔊 Hear the reading' : '🔊 വായന കേൾക്കാം';
+      document.getElementById('ttsPlayBtn').textContent = lang === 'en' ? '▶ Speak' : '▶ കേൾക്കുക';
+      stopTts();
+    }
   });
 
   const dailyCardStr = sessionStorage.getItem("kili_daily_card");
@@ -655,6 +662,11 @@ async function renderReadingFromPromise() {
       if (data.tokens_used) {
         document.getElementById('kili-tokens').innerHTML = ``;
       }
+      const ttsLabel = document.getElementById('ttsLabel');
+      if (ttsLabel) {
+        ttsLabel.textContent = lang === 'en' ? '🔊 Hear the reading' : '🔊 വായന കേൾക്കാം';
+        document.getElementById('ttsPlayBtn').textContent = lang === 'en' ? '▶ Speak' : '▶ കേൾക്കുക';
+      }
     } else {
       document.getElementById('read-insights').textContent = window.translations && window.translations[lang] ? window.translations[lang].kili_error1 : "The parrot is resting. Please try again.";
     }
@@ -664,3 +676,161 @@ async function renderReadingFromPromise() {
     document.getElementById('read-insights').textContent = window.translations && window.translations[lang] ? window.translations[lang].kili_error2 : "Connection lost to the cosmic realm.";
   }
 }
+
+// ── TTS ────────────────────────────────────────────────────────
+let ttsChunks = [], ttsIdx = 0, ttsPaused = false, ttsAudio = null, nextTtsAudio = null, ttsActive = false;
+
+function getReadingText() {
+  let text = "";
+  const name = document.getElementById('result-name') ? document.getElementById('result-name').innerText : "";
+  const theme = document.getElementById('result-theme') ? document.getElementById('result-theme').innerText : "";
+  const meaning = document.getElementById('read-meaning') ? document.getElementById('read-meaning').innerText : "";
+  const sanskrit = document.getElementById('read-wisdom-sanskrit') ? document.getElementById('read-wisdom-sanskrit').innerText : "";
+  const wisdom = document.getElementById('read-wisdom-english') ? document.getElementById('read-wisdom-english').innerText : "";
+  const guidance = document.getElementById('read-guidance') ? document.getElementById('read-guidance').innerText : "";
+  const reflection = document.getElementById('read-reflection') ? document.getElementById('read-reflection').innerText : "";
+  const insights = document.getElementById('read-insights') ? document.getElementById('read-insights').innerText : "";
+  
+  if (name) text += name + ". ";
+  if (theme) text += theme + ". ";
+  if (meaning) text += meaning + " ";
+  if (insights) text += insights + " ";
+  if (sanskrit) text += sanskrit + " ";
+  if (wisdom) text += wisdom + " ";
+  if (guidance) text += guidance + " ";
+  if (reflection) text += reflection + " ";
+  return text;
+}
+
+function cleanForTts(t) {
+  return t.replace(/#{1,4}/g, '').replace(/\*+/g, '').replace(/═+/g, '').replace(/━+/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function handleTtsPlay() {
+  stopTts();
+  const text = cleanForTts(getReadingText());
+  const currentLang = localStorage.getItem('astro_lang_preference') || 'en';
+  if (currentLang === 'ml') {
+    const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    const hasMlVoice = voices.some(v => v.lang.toLowerCase().includes('ml'));
+    if (hasMlVoice) {
+      startBrowserTts(text, 'ml-IN');
+    } else {
+      startGoogleTts(text, 'ml');
+    }
+  } else {
+    startBrowserTts(text, 'en-US');
+  }
+}
+
+function handleTtsPause() {
+  if (ttsAudio) {
+    if (ttsAudio.paused) { ttsAudio.play(); }
+    else { ttsAudio.pause(); }
+  } else if (window.speechSynthesis) {
+    if (speechSynthesis.paused) speechSynthesis.resume();
+    else speechSynthesis.pause();
+  }
+}
+
+function handleTtsStop() { stopTts(); }
+
+function stopTts() {
+  ttsActive = false; ttsPaused = false;
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+  if (nextTtsAudio) { nextTtsAudio.pause(); nextTtsAudio = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  const ttsWaves = document.getElementById('ttsWaves');
+  if (ttsWaves) ttsWaves.classList.remove('active');
+  const ttsPauseBtn = document.getElementById('ttsPauseBtn');
+  if (ttsPauseBtn) ttsPauseBtn.disabled = true;
+  const ttsPlayBtn = document.getElementById('ttsPlayBtn');
+  if (ttsPlayBtn) ttsPlayBtn.disabled = false;
+}
+
+function setTtsPlaying(on) {
+  const ttsWaves = document.getElementById('ttsWaves');
+  if (ttsWaves) ttsWaves.classList.toggle('active', on);
+  const ttsPauseBtn = document.getElementById('ttsPauseBtn');
+  if (ttsPauseBtn) ttsPauseBtn.disabled = !on;
+  const ttsPlayBtn = document.getElementById('ttsPlayBtn');
+  if (ttsPlayBtn) ttsPlayBtn.disabled = on;
+}
+
+function startGoogleTts(text, lang) {
+  ttsChunks = text.match(/[^.!?।\n]{1,150}[.!?।\n]?/g) || [text];
+  ttsChunks = ttsChunks.map(s => s.trim()).filter(s => s.length > 2);
+  ttsIdx = 0; ttsActive = true;
+  setTtsPlaying(true);
+  playChunk(lang);
+}
+
+function playChunk(lang) {
+  if (!ttsActive || ttsIdx >= ttsChunks.length) { stopTts(); return; }
+
+  if (nextTtsAudio && nextTtsAudio.dataset.idx === String(ttsIdx)) {
+    ttsAudio = nextTtsAudio;
+    nextTtsAudio = null;
+  } else {
+    const encoded = encodeURIComponent(ttsChunks[ttsIdx]);
+    const url = `${API_URL}/tts?text=${encoded}&lang=${lang}`;
+    ttsAudio = new Audio(url);
+    ttsAudio.preservesPitch = false;
+    ttsAudio.playbackRate = 0.82;
+  }
+
+  setTtsPlaying(true);
+
+  ttsAudio.play().then(() => {
+    const nextIdx = ttsIdx + 1;
+    if (nextIdx < ttsChunks.length) {
+      const nextEncoded = encodeURIComponent(ttsChunks[nextIdx]);
+      const nextUrl = `${API_URL}/tts?text=${nextEncoded}&lang=${lang}`;
+      nextTtsAudio = new Audio(nextUrl);
+      nextTtsAudio.dataset.idx = String(nextIdx);
+      nextTtsAudio.preservesPitch = false;
+      nextTtsAudio.playbackRate = 0.82;
+      nextTtsAudio.load();
+    }
+    ttsAudio.onended = () => { ttsIdx++; playChunk(lang); };
+  }).catch(() => {
+    ttsIdx++; playChunk(lang);
+  });
+  ttsAudio.onerror = () => { ttsIdx++; playChunk(lang); };
+}
+
+function startBrowserTts(text, lang) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  utter.rate = 0.76;
+  utter.pitch = 0.65;
+
+  const voices = speechSynthesis.getVoices();
+
+  let v = voices.find(v =>
+    v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]) &&
+    (v.name.toLowerCase().includes('male') ||
+      v.name.toLowerCase().includes('valluvan') ||
+      v.name.toLowerCase().includes('ravi') ||
+      v.name.toLowerCase().includes('david'))
+  );
+
+  if (!v) {
+    v = voices.find(v => v.lang.toLowerCase() === lang.toLowerCase());
+  }
+  if (!v) {
+    v = voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]));
+  }
+  if (!v && lang.startsWith('en')) {
+    v = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('en-GB'));
+  }
+  if (v) utter.voice = v;
+
+  utter.onstart = () => setTtsPlaying(true);
+  utter.onend = utter.onerror = () => stopTts();
+  speechSynthesis.speak(utter);
+  setTtsPlaying(true);
+}
+
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { };
+

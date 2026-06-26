@@ -153,6 +153,17 @@
         </div>
 
         <div id="reading-content" class="reading-content" style="display: none;">
+          <!-- TTS -->
+          <div class="tts-control" id="ttsControl">
+            <span class="tts-label" id="ttsLabel" data-i18n="palm_tts_label">🔊 Hear the reading</span>
+            <button class="tts-btn" id="ttsPlayBtn" onclick="handleTtsPlay()" data-i18n="palm_speak">▶ Speak</button>
+            <button class="tts-btn" id="ttsPauseBtn" onclick="handleTtsPause()" disabled data-i18n="palm_pause">⏸ Pause</button>
+            <button class="tts-btn" onclick="handleTtsStop()" data-i18n="palm_stop">⏹ Stop</button>
+            <div class="tts-waves" id="ttsWaves">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
           <h3 data-i18n="kili_meaning">Meaning</h3>
           <p id="read-meaning"></p>
 
