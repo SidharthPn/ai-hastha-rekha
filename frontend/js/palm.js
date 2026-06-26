@@ -200,7 +200,6 @@ async function proceedAfterWarning() {
   document.getElementById('scannedBox').classList.add('scanning');
   setStep(2);
   startRitualMessages();
-  if (!musicPlaying) toggleMusic();
   const form = pendingForm;
   pendingForm = null;
   await runFullAnalysis(form);
@@ -299,7 +298,6 @@ async function analyze() {
 
     // No mismatch (or detection skipped) — run the full analysis
     startRitualMessages();
-    if (!musicPlaying) toggleMusic();
     await runFullAnalysis(form);
 
   } catch (err) {
@@ -393,10 +391,10 @@ function renderReadingJSON(data, lang) {
   let html = '';
 
   // Metadata Bar
-  html += `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px; font-size:0.9rem; color:var(--gold-dim);">
-          <span>${lang === 'en' ? 'Age' : 'പ്രായം'}: <b>${data.age || '-'}</b></span> |
-          <span>${lang === 'en' ? 'Zodiac' : 'രാശി'}: <b>${data.zodiac_sign || '-'}</b></span> |
-          <span>${lang === 'en' ? 'Element' : 'മൂലകം'}: <b>${data.element || '-'}</b></span>
+  html += `<div style="background:var(--surface2); padding:15px; border-radius:10px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:10px; font-size:0.9rem; color:var(--text-dim); border:1px solid var(--gold-dim);">
+          <span>${lang === 'en' ? 'Age' : 'പ്രായം'}: <b style="color:var(--text);">${data.age || '-'}</b></span> |
+          <span>${lang === 'en' ? 'Zodiac' : 'രാശി'}: <b style="color:var(--text);">${data.zodiac_sign || '-'}</b></span> |
+          <span>${lang === 'en' ? 'Element' : 'മൂലകം'}: <b style="color:var(--text);">${data.element || '-'}</b></span>
         </div>`;
 
   const sections = ['personality', 'strengths', 'career', 'relationships', 'current_life_phase', 'hidden_potential', 'guidance'];

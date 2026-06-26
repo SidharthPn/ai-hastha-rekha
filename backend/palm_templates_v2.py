@@ -583,7 +583,7 @@ Confidence Level: {s.get('confidence','medium').capitalize()}
 
 Rules: no bullet points, no clinical words, frame everything positively."""
 def build_advanced_palmistry_prompt(slots: dict, astro_data: dict, dominance: str, lang: str) -> str:
-    lang_instruction = "Malayalam (using Malayalam script)" if lang == 'ml' else "English"
+    lang_instruction = "STRICTLY MALAYALAM (You MUST write the entire JSON values in pure Malayalam script. Do NOT use English at all.)" if lang == 'ml' else "English"
     return f'''You are an expert Vedic astrologer and master palmist.
 You are giving a reading to a user based on their scanned hand details and astrological data.
 Language required: {lang_instruction}.
