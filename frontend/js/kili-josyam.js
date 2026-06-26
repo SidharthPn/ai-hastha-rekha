@@ -3,6 +3,11 @@ let currentCircleCards = [];
 let selectedDeity = null;
 let selectedCircleIndex = 0;
 let dobInput = "";
+let readingPromise = null;
+
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : 'https://ai-hastha-rekha.onrender.com';
 
 // Three.js variables
 let scene, camera, renderer, parrot, mixer, clock;
@@ -13,6 +18,9 @@ let stateTimer = 0;
 const stateDurations = [1.5, 0.8, 0.9, 3.0, 1.2];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Wake up backend to avoid cold start delays
+  fetch(`${API_URL}/`).catch(() => {});
+
   // Fetch cards
   try {
     const res = await fetch("data/kili_cards.json");
@@ -51,7 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (document.getElementById('screen3').classList.contains('active') && selectedDeity) {
       displayResult();
-      fetchReading(); // Re-fetch the reading in the new language
+      document.getElementById('loading-reading').style.display = 'flex';
+      document.getElementById('reading-content').style.display = 'none';
+      readingPromise = preloadReadingData();
+      renderReadingFromPromise();
     }
   });
 
@@ -464,6 +475,9 @@ function startAnimationSequence(dailyCardOverride = null) {
 
   const targetCard = document.getElementById(`card-${selectedCircleIndex}`);
 
+  // PRELOAD API READING NOW (saves 5.5 seconds + hides latency)
+  readingPromise = preloadReadingData();
+
   // Hide cage, show glowing door
   cageDisplay.style.display = 'none';
   doorDisplay.style.display = 'flex';
@@ -507,7 +521,7 @@ function startAnimationSequence(dailyCardOverride = null) {
   setTimeout(() => {
     switchScreen('screen2', 'screen3');
     displayResult();
-    fetchReading();
+    renderReadingFromPromise();
   }, 5500);
 }
 
@@ -598,15 +612,11 @@ function formatText(text) {
   return text.replace(/\n/g, '<br>');
 }
 
-async function fetchReading() {
+async function preloadReadingData() {
   const age = calculateAge(dobInput);
   const lang = localStorage.getItem('astro_lang_preference') || 'en';
-
-  const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8000'
-    : 'https://ai-hastha-rekha.onrender.com';
-
   const profile = window.AstroProfiles ? window.AstroProfiles.getActiveProfile() : {};
+  
   try {
     const response = await fetch(`${API_URL}/kili-reading`, {
       method: 'POST',
@@ -620,8 +630,16 @@ async function fetchReading() {
         card_data: selectedDeity
       })
     });
+    return await response.json();
+  } catch (error) {
+    return { status: 'error' };
+  }
+}
 
-    const data = await response.json();
+async function renderReadingFromPromise() {
+  const lang = localStorage.getItem('astro_lang_preference') || 'en';
+  try {
+    const data = await readingPromise;
 
     document.getElementById('loading-reading').style.display = 'none';
     document.getElementById('reading-content').style.display = 'block';

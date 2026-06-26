@@ -315,3 +315,22 @@
     color: var(--gold-l);
     letter-spacing: 2px;
 }
+
+/* ── MOBILE RESPONSIVENESS ── */
+.responsive-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media(max-width: 768px) {
+    .responsive-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .insight-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

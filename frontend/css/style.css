@@ -693,15 +693,22 @@ nav {
     gap: 12px;
 }
 
+.span-2 {
+    grid-column: span 2;
+}
+
 @media(max-width:800px) {
     .dash-grid {
         grid-template-columns: repeat(2, 1fr)
     }
 }
 
-@media(max-width:400px) {
+@media(max-width:600px) {
     .dash-grid {
-        grid-template-columns: 1fr 1fr
+        grid-template-columns: 1fr;
+    }
+    .span-2 {
+        grid-column: span 1;
     }
 }
 

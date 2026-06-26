@@ -3,6 +3,12 @@ const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers
 document.documentElement.setAttribute('data-theme', savedTheme);
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Wake up backend to avoid cold start delays
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:8000'
+        : 'https://ai-hastha-rekha.onrender.com';
+    fetch(`${API_URL}/`).catch(() => {});
+
     const themeToggler = document.getElementById('themeToggler');
     if (themeToggler) {
         themeToggler.addEventListener('click', () => {
