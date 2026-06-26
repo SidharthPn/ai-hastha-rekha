@@ -830,7 +830,8 @@
 
     .reading-body p {
       margin-bottom: 14px;
-      color: rgba(240, 230, 211, 0.88)
+      color: var(--text);
+      opacity: 0.88;
     }
 
     .reading-body .r-greeting {

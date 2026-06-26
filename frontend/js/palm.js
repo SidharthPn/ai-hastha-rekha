@@ -265,36 +265,12 @@ async function analyze() {
     if (relation) form.append('relation', relation);
     form.append('dominance', dominance);
 
-    // Show upload/loading UI before the (optional) hand-detection call
+    // Show upload/loading UI before the analysis call
     document.getElementById('uploadSection').style.display = 'none';
     document.getElementById('loadingSection').style.display = 'block';
     document.getElementById('resultSection').style.display = 'none';
-    document.getElementById('ritualText').textContent = 'Confirming hand orientation...';
-    document.getElementById('ritualSub').textContent = 'Analyzing shape and alignment';
-
-    // Optional hand-orientation check
-    try {
-      const detectForm = new FormData();
-      detectForm.append('file', imageBlob, 'palm.jpg');
-      detectForm.append('lang', userLang);
-
-      const res = await fetch(`${API_URL}/detect-hand`, { method: 'POST', body: detectForm });
-      const data = await res.json();
-
-      if (data.status === 'success') {
-        const detected = data.detected_hand; // 'left', 'right', 'undetermined'
-        if (detected !== 'undetermined' && detected !== dominance) {
-          document.getElementById('scannedBox').classList.remove('scanning');
-          const selectedLabel = dominance === 'left' ? 'Left Hand' : 'Right Hand';
-          const detectedLabel = detected === 'left' ? 'Left Hand' : 'Right Hand';
-          pendingForm = form;
-          showModal(`You selected your hand as "${selectedLabel}", but our analysis detected a "${detectedLabel}". Palm readings are most accurate when using the correct hand. Do you want to proceed anyway or go back and change your choice?`);
-          return;
-        }
-      }
-    } catch (err) {
-      console.error("Hand detection failed, proceeding directly to analysis:", err);
-    }
+    document.getElementById('ritualText').textContent = 'Connecting to the cosmos...';
+    document.getElementById('ritualSub').textContent = 'Preparing for analysis';
 
     // No mismatch (or detection skipped) — run the full analysis
     startRitualMessages();
