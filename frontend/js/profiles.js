@@ -22,6 +22,7 @@ const AstroProfiles = (function() {
 
   function setActiveProfile(id) {
     localStorage.setItem(STORAGE_KEY_ACTIVE, id);
+    sessionStorage.removeItem('guru_dashboard_context');
     document.dispatchEvent(new CustomEvent('profileChanged', { detail: getActiveProfile() }));
     renderProfileBar();
   }
@@ -32,6 +33,37 @@ const AstroProfiles = (function() {
     profiles.push(profile);
     localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(profiles));
     return profile;
+  }
+
+  function updateProfile(id, updatedData) {
+    let profiles = getProfiles();
+    const idx = profiles.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      profiles[idx] = { ...profiles[idx], ...updatedData };
+      localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(profiles));
+      if (id === localStorage.getItem(STORAGE_KEY_ACTIVE)) {
+        setActiveProfile(id);
+      }
+      return profiles[idx];
+    }
+    return null;
+  }
+
+  function deleteProfile(id) {
+    let profiles = getProfiles();
+    profiles = profiles.filter(p => p.id !== id);
+    localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(profiles));
+    const activeId = localStorage.getItem(STORAGE_KEY_ACTIVE);
+    if (activeId === id) {
+      if (profiles.length > 0) {
+        setActiveProfile(profiles[0].id);
+      } else {
+        localStorage.removeItem(STORAGE_KEY_ACTIVE);
+        sessionStorage.removeItem('guru_dashboard_context');
+        document.dispatchEvent(new CustomEvent('profileChanged', { detail: null }));
+        renderProfileBar();
+      }
+    }
   }
 
   // --- UI Injections ---
@@ -130,14 +162,18 @@ const AstroProfiles = (function() {
 
     document.getElementById('profileAddView').addEventListener('submit', (e) => {
       e.preventDefault();
-      const newProfile = {
+      const newProfileData = {
         name: document.getElementById('profName').value,
         relation: document.getElementById('profRelation').value,
         dob: document.getElementById('profDob').value,
         time: document.getElementById('profTime').value
       };
-      const saved = addProfile(newProfile);
-      setActiveProfile(saved.id);
+      if (editingProfileId) {
+        updateProfile(editingProfileId, newProfileData);
+      } else {
+        const saved = addProfile(newProfileData);
+        setActiveProfile(saved.id);
+      }
       hideModal();
     });
   }
@@ -160,7 +196,11 @@ const AstroProfiles = (function() {
           <div class="profile-item-name">${p.name} <span style="font-weight:normal; font-size:14px; opacity:0.8;">(${p.relation})</span></div>
           <div class="profile-item-meta">DOB: ${p.dob}</div>
         </div>
-        ${p.id === activeId ? '<span style="color:var(--gold-deep);">✓</span>' : ''}
+        <div class="profile-item-actions">
+          <button class="profile-action-btn edit-btn" onclick="event.stopPropagation(); AstroProfiles.showEditForm('${p.id}')">✎</button>
+          <button class="profile-action-btn delete-btn" onclick="event.stopPropagation(); AstroProfiles.deleteProfileAndRefresh('${p.id}')">✕</button>
+          ${p.id === activeId ? '<span style="color:var(--gold-deep); margin-left:10px;">✓</span>' : ''}
+        </div>
       </div>
     `).join('');
   }
@@ -182,10 +222,39 @@ const AstroProfiles = (function() {
     document.getElementById('profileAddView').classList.remove('active');
   }
 
+  let editingProfileId = null;
+
   function showAddForm() {
+    editingProfileId = null;
     document.getElementById('profileListView').style.display = 'none';
-    document.getElementById('profileAddView').classList.add('active');
-    document.getElementById('profileAddView').reset();
+    const form = document.getElementById('profileAddView');
+    form.classList.add('active');
+    form.reset();
+    form.querySelector('h3').innerText = 'Add New Person';
+    form.querySelector('button[type="submit"]').innerText = 'Save Profile';
+  }
+
+  function showEditForm(id) {
+    const profile = getProfiles().find(p => p.id === id);
+    if (!profile) return;
+    editingProfileId = id;
+    document.getElementById('profileListView').style.display = 'none';
+    const form = document.getElementById('profileAddView');
+    form.classList.add('active');
+    form.querySelector('h3').innerText = 'Edit Person';
+    form.querySelector('button[type="submit"]').innerText = 'Update Profile';
+    
+    document.getElementById('profName').value = profile.name || '';
+    document.getElementById('profRelation').value = profile.relation || 'Myself';
+    document.getElementById('profDob').value = profile.dob || '';
+    document.getElementById('profTime').value = profile.time || '';
+  }
+
+  function deleteProfileAndRefresh(id) {
+    if (confirm('Are you sure you want to delete this profile?')) {
+      deleteProfile(id);
+      renderProfileList();
+    }
   }
 
   function selectAndClose(id) {
@@ -204,10 +273,14 @@ const AstroProfiles = (function() {
     getActiveProfile,
     setActiveProfile,
     addProfile,
+    updateProfile,
+    deleteProfile,
     showModal,
     hideModal,
     showListView,
     showAddForm,
+    showEditForm,
+    deleteProfileAndRefresh,
     selectAndClose,
     injectProfileBar
   };

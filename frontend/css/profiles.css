@@ -221,3 +221,30 @@
   cursor: pointer;
   font-size: 16px;
 }
+
+.profile-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-action-btn {
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--text-d);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.profile-action-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.profile-action-btn.delete-btn:hover {
+  border-color: #ff4d4d;
+  color: #ff4d4d;
+}
