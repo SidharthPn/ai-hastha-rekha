@@ -31,10 +31,11 @@ def get_tokens() -> int:
     return _TOTAL_APP_TOKENS
 
 # ── LLM CALLER ──
-def call_llm(prompt, system, max_tokens=500, temp=0.7, json_mode=False):
+def call_llm(prompt, system, max_tokens=500, temp=0.7, json_mode=False, fast=False):
     result = ""
+    models_to_try = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"] if fast else ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
     if groq_client and GROQ_API_KEY:
-        for model in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
+        for model in models_to_try:
             try:
                 kwargs = {}
                 if json_mode:

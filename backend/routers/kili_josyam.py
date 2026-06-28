@@ -44,7 +44,7 @@ DO NOT output JSON. Just the plain text."""
         card_meaning = req.card_data.get("meaning", "Unknown") if req.card_data else "Unknown"
         
         prompt = f"The reading is for {subject}, age {req.age}. The parrot has chosen a mystical card with the theme of '{card_theme}' and the meaning: '{card_meaning}'. Write the insight based on this mystical omen."
-        raw_response = call_llm(prompt, system_prompt, max_tokens=300, temp=0.7)
+        raw_response = call_llm(prompt, system_prompt, max_tokens=300, temp=0.7, fast=True)
         
         # Prepare the response payload from the card data
         reading_data = {

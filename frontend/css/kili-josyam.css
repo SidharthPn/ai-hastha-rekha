@@ -454,13 +454,15 @@ header p {
   text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
 }
 @keyframes mythicGlow {
-  0% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.5), 0 0 40px rgba(155, 89, 182, 0.3); transform: scale(1); }
-  50% { box-shadow: 0 0 40px rgba(155, 89, 182, 1), 0 0 80px rgba(155, 89, 182, 0.8), 0 0 100px rgba(241, 196, 15, 0.5); transform: scale(1.03) translateY(-10px); }
-  100% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.5), 0 0 40px rgba(155, 89, 182, 0.3); transform: scale(1); }
+  0% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.6), 0 0 40px rgba(155, 89, 182, 0.4), inset 0 0 10px rgba(155, 89, 182, 0.5); transform: perspective(1000px) rotateY(0deg) scale(1); }
+  25% { box-shadow: 0 0 30px rgba(155, 89, 182, 0.8), 0 0 60px rgba(142, 68, 173, 0.6), 0 0 100px rgba(241, 196, 15, 0.4), inset 0 0 20px rgba(155, 89, 182, 0.8); transform: perspective(1000px) rotateY(3deg) scale(1.02) translateY(-5px); }
+  50% { box-shadow: 0 0 50px rgba(155, 89, 182, 1), 0 0 90px rgba(142, 68, 173, 0.9), 0 0 120px rgba(241, 196, 15, 0.6), inset 0 0 30px rgba(155, 89, 182, 1); transform: perspective(1000px) rotateY(0deg) scale(1.04) translateY(-12px); }
+  75% { box-shadow: 0 0 30px rgba(155, 89, 182, 0.8), 0 0 60px rgba(142, 68, 173, 0.6), 0 0 100px rgba(241, 196, 15, 0.4), inset 0 0 20px rgba(155, 89, 182, 0.8); transform: perspective(1000px) rotateY(-3deg) scale(1.02) translateY(-5px); }
+  100% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.6), 0 0 40px rgba(155, 89, 182, 0.4), inset 0 0 10px rgba(155, 89, 182, 0.5); transform: perspective(1000px) rotateY(0deg) scale(1); }
 }
 
 .mythic-card-animation {
-  animation: mythicGlow 2.5s infinite ease-in-out !important;
+  animation: mythicGlow 3.5s infinite ease-in-out !important;
   border: 2px solid #9b59b6 !important;
 }
 
@@ -538,3 +540,104 @@ header p {
   50% { height: 16px; }
 }
 
+@keyframes goldenGlow {
+  0% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5), 0 0 30px rgba(241, 196, 15, 0.3), inset 0 0 10px rgba(241, 196, 15, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 35px rgba(241, 196, 15, 0.9), 0 0 70px rgba(241, 196, 15, 0.7), inset 0 0 25px rgba(241, 196, 15, 0.8); transform: scale(1.03) translateY(-8px); }
+  100% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5), 0 0 30px rgba(241, 196, 15, 0.3), inset 0 0 10px rgba(241, 196, 15, 0.4); transform: scale(1); }
+}
+
+.golden-card-animation {
+  animation: goldenGlow 3.5s infinite ease-in-out !important;
+  border: 2px solid #f1c40f !important;
+}
+
+@keyframes silverGlow {
+  0% { box-shadow: 0 0 15px rgba(189, 195, 199, 0.4), 0 0 25px rgba(236, 240, 241, 0.2), inset 0 0 8px rgba(236, 240, 241, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 25px rgba(189, 195, 199, 0.8), 0 0 50px rgba(236, 240, 241, 0.5), inset 0 0 15px rgba(236, 240, 241, 0.6); transform: scale(1.02) translateY(-4px); }
+  100% { box-shadow: 0 0 15px rgba(189, 195, 199, 0.4), 0 0 25px rgba(236, 240, 241, 0.2), inset 0 0 8px rgba(236, 240, 241, 0.3); transform: scale(1); }
+}
+
+.silver-card-animation {
+  animation: silverGlow 4s infinite ease-in-out !important;
+  border: 2px solid #ecf0f1 !important;
+}
+
+/* Rarity Guide Sticky Note */
+.rarity-guide-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+.guide-btn {
+  width: 50px;
+  height: 50px;
+  background: rgba(11, 15, 25, 0.95);
+  border: 2px solid var(--kili-gold);
+  border-radius: 50%;
+  color: var(--kili-gold);
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+.guide-btn:hover {
+  background: var(--kili-gold);
+  color: var(--kili-bg);
+  box-shadow: var(--kili-glow);
+}
+.guide-popover {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  width: 220px;
+  background: rgba(11, 15, 25, 0.95);
+  border: 1px solid var(--kili-gold-dim);
+  border-radius: 12px;
+  padding: 15px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+.guide-popover.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.guide-popover h4 {
+  color: var(--kili-gold);
+  margin-bottom: 12px;
+  font-family: 'Playfair Display', serif;
+  border-bottom: 1px solid var(--kili-gold-dim);
+  padding-bottom: 5px;
+  font-size: 1.1rem;
+}
+.guide-popover ul {
+  list-style: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #fff;
+}
+.guide-popover ul li {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+  .rarity-guide-container {
+    bottom: 20px;
+    right: 20px;
+  }
+  .guide-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+}

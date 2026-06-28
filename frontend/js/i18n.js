@@ -179,7 +179,12 @@ const translations = {
     daily_fortune_title: "Daily Fortune",
     daily_fortune_sub: "Pick a card to reveal today's cosmic guidance.",
     daily_fortune_teaser: "✨ The Parrot senses there is more to reveal...",
-    daily_fortune_cta: "Continue to Kili Josyam →"
+    daily_fortune_cta: "Continue to Kili Josyam →",
+    guide_title: "Card Rarities",
+    guide_mythic: "<span style='color:#9b59b6; font-weight:bold;'>Mythic</span> - Extremely Rare",
+    guide_gold: "<span style='color:#f1c40f; font-weight:bold;'>Gold</span> - Rare",
+    guide_silver: "<span style='color:#ecf0f1; font-weight:bold;'>Silver</span> - Uncommon",
+    guide_common: "<span style='color:#a0aec0; font-weight:bold;'>Common</span> - Standard"
   },
   ml: {
     site_title: "ജ്യോതിഷ് AI",
@@ -361,7 +366,12 @@ const translations = {
     daily_fortune_title: "പ്രതിദിന ഭാഗ്യം",
     daily_fortune_sub: "ഇന്നത്തെ ആത്മീയ മാർഗ്ഗനിർദ്ദേശം അറിയാൻ ഒരു കാർഡ് എടുക്കുക.",
     daily_fortune_teaser: "✨ തത്തയ്ക്ക് കൂടുതൽ കാര്യങ്ങൾ വെളിപ്പെടുത്താനുണ്ട്...",
-    daily_fortune_cta: "കിളി ജ്യോത്സ്യത്തിലേക്ക് തുടരുക →"
+    daily_fortune_cta: "കിളി ജ്യോത്സ്യത്തിലേക്ക് തുടരുക →",
+    guide_title: "കാർഡുകളുടെ അപൂർവ്വത",
+    guide_mythic: "<span style='color:#9b59b6; font-weight:bold;'>അപൂർവ്വം (Mythic)</span> - അത്യപൂർവ്വം",
+    guide_gold: "<span style='color:#f1c40f; font-weight:bold;'>സ്വർണ്ണം (Gold)</span> - അപൂർവ്വം",
+    guide_silver: "<span style='color:#ecf0f1; font-weight:bold;'>വെള്ളി (Silver)</span> - അസാധാരണം",
+    guide_common: "<span style='color:#a0aec0; font-weight:bold;'>സാധാരണം (Common)</span> - സാധാരണം"
   }
 };
 
