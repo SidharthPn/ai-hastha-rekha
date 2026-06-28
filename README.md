@@ -1,4 +1,4 @@
-# Jyotish AI - Hastha Rekha & Kili Josyam
+# Jyotish AI 
 
 A comprehensive modern web application that combines traditional Vedic astrology, Palmistry (Hastha Rekha), and Parrot Astrology (Kili Josyam) with the power of modern Artificial Intelligence.
 
