@@ -470,6 +470,8 @@ function displayResult() {
   const rarityBanner = document.getElementById('result-rarity-banner');
   const visualCard = document.getElementById('result-card-visual');
   visualCard.classList.remove('mythic-card-animation');
+  visualCard.classList.remove('golden-card-animation');
+  visualCard.classList.remove('silver-card-animation');
 
   const rarityText = lang === 'ml' ? (
     selectedDeity.rarity === 'Mythic' ? 'അപൂർവ്വ' :
@@ -489,10 +491,12 @@ function displayResult() {
     rarityBanner.style.color = '#000';
     rarityBanner.style.background = 'linear-gradient(90deg, #f1c40f, #f39c12)';
     rarityBanner.style.boxShadow = '0 0 20px rgba(241, 196, 15, 0.5)';
+    visualCard.classList.add('golden-card-animation');
   } else if (selectedDeity.rarity === 'Silver') {
     rarityBanner.style.color = '#000';
     rarityBanner.style.background = 'linear-gradient(90deg, #ecf0f1, #bdc3c7)';
     rarityBanner.style.boxShadow = '0 0 15px rgba(236, 240, 241, 0.4)';
+    visualCard.classList.add('silver-card-animation');
   } else {
     rarityBanner.style.color = '#fff';
     rarityBanner.style.background = 'linear-gradient(90deg, #34495e, #2c3e50)';
