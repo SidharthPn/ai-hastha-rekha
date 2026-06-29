@@ -51,8 +51,5 @@ Then open `http://localhost:3000` in your web browser.
 - The backend is configured to be easily deployable on **Render**.
 - The frontend can be deployed on static hosting providers like **Vercel** or **Netlify**.
 
-## Recent Updates
-- Added highly interactive Mythic card animations for Kili Josyam.
-- Refactored Kili Josyam card logic to support multi-language translation bindings consistently.
-- Optimized Daily Dashboard AI generation to ensure lucky numbers, ratings, and astrological features remain perfectly consistent when switching languages.
-- Restored missing palmistry reading modules for advanced palm line tracking.
+
+
